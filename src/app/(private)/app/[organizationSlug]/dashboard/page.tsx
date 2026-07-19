@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { LogoutButton } from "@/features/auth/components/logout-button";
 import { requireOrganizationMember } from "@/features/organizations/application/require-organization-member";
 import { CurrentOrganization } from "@/features/organizations/components/current-organization";
@@ -29,6 +31,49 @@ export default async function OrganizationDashboardPage({
             gestão serão adicionados nas próximas etapas.
           </p>
         </section>
+
+        {context.membership.role === "admin" ||
+        context.membership.role === "coordinator" ? (
+          <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-zinc-950">Cadastros</h2>
+            <p className="mt-1 text-sm text-zinc-600">
+              Configure os dados mestres usados pela organização.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Link
+                href={`/app/${organizationSlug}/cadastros/clientes`}
+                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
+              >
+                <span className="font-semibold text-zinc-950">Clientes</span>
+                <span className="mt-1 block text-sm text-zinc-600">
+                  Empresas atendidas e suas unidades.
+                </span>
+              </Link>
+              <Link
+                href={`/app/${organizationSlug}/cadastros/especialidades`}
+                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
+              >
+                <span className="font-semibold text-zinc-950">
+                  Especialidades
+                </span>
+                <span className="mt-1 block text-sm text-zinc-600">
+                  Áreas de conhecimento técnico.
+                </span>
+              </Link>
+              <Link
+                href={`/app/${organizationSlug}/cadastros/tipos-atendimento`}
+                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
+              >
+                <span className="font-semibold text-zinc-950">
+                  Tipos de atendimento
+                </span>
+                <span className="mt-1 block text-sm text-zinc-600">
+                  Categorias para os atendimentos futuros.
+                </span>
+              </Link>
+            </div>
+          </section>
+        ) : null}
       </div>
     </main>
   );

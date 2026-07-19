@@ -4,7 +4,7 @@ with target_user as (
   select
     users.id
   from auth.users as users
-  where lower(users.email) = lower('fjoooosa@gmail.com')
+  where lower(users.email) = lower('pascoalotavio2@gmail.com')
 ),
 created_organization as (
   insert into public.organizations (
