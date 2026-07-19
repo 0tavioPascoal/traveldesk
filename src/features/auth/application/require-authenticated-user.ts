@@ -1,9 +1,15 @@
+import "server-only";
+
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/features/auth/application/get-current-user";
 
-export default async function HomePage() {
+export async function requireAuthenticatedUser() {
   const user = await getCurrentUser();
 
-  redirect(user ? "/app" : "/login");
+  if (!user) {
+    redirect("/login");
+  }
+
+  return user;
 }

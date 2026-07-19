@@ -1,0 +1,2 @@
+-- O bootstrap de usuários e organizações é manual.
+-- Fixtures de isolamento pertencem aos testes transacionais em tests/database.
