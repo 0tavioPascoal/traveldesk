@@ -1,9 +1,8 @@
-import { redirect } from "next/navigation";
-
 import { requireAuthenticatedUser } from "@/features/auth/application/require-authenticated-user";
 import { LogoutButton } from "@/features/auth/components/logout-button";
 import { listUserOrganizations } from "@/features/organizations/application/list-user-organizations";
 import { NoOrganizationsState } from "@/features/organizations/components/no-organizations-state";
+import { OrganizationRedirect } from "@/features/organizations/components/organization-redirect";
 import { OrganizationSelector } from "@/features/organizations/components/organization-selector";
 
 export default async function AppPage() {
@@ -11,7 +10,7 @@ export default async function AppPage() {
   const organizations = await listUserOrganizations();
 
   if (organizations.length === 1) {
-    redirect(`/app/${organizations[0].slug}/dashboard`);
+    return <OrganizationRedirect organizationSlug={organizations[0].slug} />;
   }
 
   return (

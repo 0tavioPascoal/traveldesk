@@ -7,31 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       client_units: {
@@ -488,16 +463,378 @@ export type Database = {
           },
         ]
       }
+      technician_skills: {
+        Row: {
+          created_at: string
+          created_by: string
+          is_primary: boolean
+          organization_id: string
+          proficiency_level: number
+          skill_id: string
+          technician_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          is_primary?: boolean
+          organization_id: string
+          proficiency_level: number
+          skill_id: string
+          technician_id: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          is_primary?: boolean
+          organization_id?: string
+          proficiency_level?: number
+          skill_id?: string
+          technician_id?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_skills_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_skills_created_by_membership_fkey"
+            columns: ["organization_id", "created_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "technician_skills_skill_fkey"
+            columns: ["organization_id", "skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "technician_skills_technician_fkey"
+            columns: ["organization_id", "technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "technician_skills_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_skills_updated_by_membership_fkey"
+            columns: ["organization_id", "updated_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+        ]
+      }
+      technicians: {
+        Row: {
+          active: boolean
+          base_city: string
+          base_state: string
+          can_drive_company_vehicle: boolean
+          created_at: string
+          created_by: string
+          document: string | null
+          driver_license_category: string | null
+          driver_license_expires_at: string | null
+          driver_license_number: string | null
+          email: string | null
+          id: string
+          job_title: string | null
+          name: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          profile_id: string | null
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          active?: boolean
+          base_city: string
+          base_state: string
+          can_drive_company_vehicle?: boolean
+          created_at?: string
+          created_by: string
+          document?: string | null
+          driver_license_category?: string | null
+          driver_license_expires_at?: string | null
+          driver_license_number?: string | null
+          email?: string | null
+          id?: string
+          job_title?: string | null
+          name: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          profile_id?: string | null
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          active?: boolean
+          base_city?: string
+          base_state?: string
+          can_drive_company_vehicle?: boolean
+          created_at?: string
+          created_by?: string
+          document?: string | null
+          driver_license_category?: string | null
+          driver_license_expires_at?: string | null
+          driver_license_number?: string | null
+          email?: string | null
+          id?: string
+          job_title?: string | null
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          profile_id?: string | null
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technicians_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technicians_created_by_membership_fkey"
+            columns: ["organization_id", "created_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "technicians_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technicians_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technicians_profile_membership_fkey"
+            columns: ["organization_id", "profile_id"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "technicians_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technicians_updated_by_membership_fkey"
+            columns: ["organization_id", "updated_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          active: boolean
+          base_city: string
+          base_state: string
+          brand: string
+          created_at: string
+          created_by: string
+          current_mileage: number | null
+          id: string
+          licensing_expires_at: string | null
+          maintenance_due_at: string | null
+          manufacture_year: number | null
+          model: string
+          model_year: number | null
+          notes: string | null
+          operational_status: Database["public"]["Enums"]["vehicle_operational_status"]
+          organization_id: string
+          passenger_capacity: number
+          plate: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          active?: boolean
+          base_city: string
+          base_state: string
+          brand: string
+          created_at?: string
+          created_by: string
+          current_mileage?: number | null
+          id?: string
+          licensing_expires_at?: string | null
+          maintenance_due_at?: string | null
+          manufacture_year?: number | null
+          model: string
+          model_year?: number | null
+          notes?: string | null
+          operational_status?: Database["public"]["Enums"]["vehicle_operational_status"]
+          organization_id: string
+          passenger_capacity: number
+          plate: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          active?: boolean
+          base_city?: string
+          base_state?: string
+          brand?: string
+          created_at?: string
+          created_by?: string
+          current_mileage?: number | null
+          id?: string
+          licensing_expires_at?: string | null
+          maintenance_due_at?: string | null
+          manufacture_year?: number | null
+          model?: string
+          model_year?: number | null
+          notes?: string | null
+          operational_status?: Database["public"]["Enums"]["vehicle_operational_status"]
+          organization_id?: string
+          passenger_capacity?: number
+          plate?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_created_by_membership_fkey"
+            columns: ["organization_id", "created_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "vehicles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_updated_by_membership_fkey"
+            columns: ["organization_id", "updated_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_technician_with_skills: {
+        Args: {
+          p_base_city: string
+          p_base_state: string
+          p_can_drive_company_vehicle: boolean
+          p_document: string | null
+          p_driver_license_category: string | null
+          p_driver_license_expires_at: string | null
+          p_driver_license_number: string | null
+          p_email: string | null
+          p_job_title: string | null
+          p_name: string
+          p_notes: string | null
+          p_organization_id: string
+          p_phone: string | null
+          p_skills: Json
+        }
+        Returns: string
+      }
+      link_technician_profile: {
+        Args: {
+          p_organization_id: string
+          p_profile_id: string
+          p_technician_id: string
+        }
+        Returns: boolean
+      }
+      list_available_technician_profiles: {
+        Args: { p_organization_id: string; p_technician_id?: string }
+        Returns: {
+          email: string
+          id: string
+          name: string
+        }[]
+      }
+      unlink_technician_profile: {
+        Args: { p_organization_id: string; p_technician_id: string }
+        Returns: boolean
+      }
+      update_technician_with_skills: {
+        Args: {
+          p_base_city: string
+          p_base_state: string
+          p_can_drive_company_vehicle: boolean
+          p_document: string | null
+          p_driver_license_category: string | null
+          p_driver_license_expires_at: string | null
+          p_driver_license_number: string | null
+          p_email: string | null
+          p_job_title: string | null
+          p_name: string
+          p_notes: string | null
+          p_organization_id: string
+          p_phone: string | null
+          p_skills: Json
+          p_technician_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       organization_member_status: "invited" | "active" | "blocked"
       organization_role: "admin" | "coordinator" | "technician"
+      vehicle_operational_status: "available" | "maintenance" | "blocked"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -623,14 +960,11 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       organization_member_status: ["invited", "active", "blocked"],
       organization_role: ["admin", "coordinator", "technician"],
+      vehicle_operational_status: ["available", "maintenance", "blocked"],
     },
   },
 } as const
-

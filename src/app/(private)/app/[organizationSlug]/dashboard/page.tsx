@@ -41,6 +41,24 @@ export default async function OrganizationDashboardPage({
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <Link
+                href={`/app/${organizationSlug}/cadastros/veiculos`}
+                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
+              >
+                <span className="font-semibold text-zinc-950">Veículos</span>
+                <span className="mt-1 block text-sm text-zinc-600">
+                  Frota, capacidade e condição operacional.
+                </span>
+              </Link>
+              <Link
+                href={`/app/${organizationSlug}/cadastros/tecnicos`}
+                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
+              >
+                <span className="font-semibold text-zinc-950">Técnicos</span>
+                <span className="mt-1 block text-sm text-zinc-600">
+                  Profissionais, especialidades e aptidão para condução.
+                </span>
+              </Link>
+              <Link
                 href={`/app/${organizationSlug}/cadastros/clientes`}
                 className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
               >
