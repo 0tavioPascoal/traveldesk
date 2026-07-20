@@ -7,6 +7,31 @@ export type Json =
   | Json[]
 
 export type Database = {
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       client_units: {
@@ -542,6 +567,179 @@ export type Database = {
           },
         ]
       }
+      technician_unavailabilities: {
+        Row: {
+          active: boolean
+          all_day: boolean
+          created_at: string
+          created_by: string
+          ends_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reason: string | null
+          starts_at: string
+          technician_id: string
+          unavailability_type_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          active?: boolean
+          all_day?: boolean
+          created_at?: string
+          created_by: string
+          ends_at: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          reason?: string | null
+          starts_at: string
+          technician_id: string
+          unavailability_type_id: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          active?: boolean
+          all_day?: boolean
+          created_at?: string
+          created_by?: string
+          ends_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          reason?: string | null
+          starts_at?: string
+          technician_id?: string
+          unavailability_type_id?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_unavailabilities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_unavailabilities_created_by_membership_fkey"
+            columns: ["organization_id", "created_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "technician_unavailabilities_organization_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_unavailabilities_technician_fkey"
+            columns: ["organization_id", "technician_id"]
+            isOneToOne: false
+            referencedRelation: "technicians"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "technician_unavailabilities_type_fkey"
+            columns: ["organization_id", "unavailability_type_id"]
+            isOneToOne: false
+            referencedRelation: "technician_unavailability_types"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "technician_unavailabilities_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_unavailabilities_updated_by_membership_fkey"
+            columns: ["organization_id", "updated_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+        ]
+      }
+      technician_unavailability_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_unavailability_types_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_unavailability_types_created_by_membership_fkey"
+            columns: ["organization_id", "created_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "technician_unavailability_types_organization_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_unavailability_types_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technician_unavailability_types_updated_by_membership_fkey"
+            columns: ["organization_id", "updated_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+        ]
+      }
       technicians: {
         Row: {
           active: boolean
@@ -654,6 +852,179 @@ export type Database = {
           },
           {
             foreignKeyName: "technicians_updated_by_membership_fkey"
+            columns: ["organization_id", "updated_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+        ]
+      }
+      vehicle_unavailabilities: {
+        Row: {
+          active: boolean
+          all_day: boolean
+          created_at: string
+          created_by: string
+          ends_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          reason: string | null
+          starts_at: string
+          unavailability_type_id: string
+          updated_at: string
+          updated_by: string
+          vehicle_id: string
+        }
+        Insert: {
+          active?: boolean
+          all_day?: boolean
+          created_at?: string
+          created_by: string
+          ends_at: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          reason?: string | null
+          starts_at: string
+          unavailability_type_id: string
+          updated_at?: string
+          updated_by: string
+          vehicle_id: string
+        }
+        Update: {
+          active?: boolean
+          all_day?: boolean
+          created_at?: string
+          created_by?: string
+          ends_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          reason?: string | null
+          starts_at?: string
+          unavailability_type_id?: string
+          updated_at?: string
+          updated_by?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_unavailabilities_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailabilities_created_by_membership_fkey"
+            columns: ["organization_id", "created_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailabilities_organization_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailabilities_type_fkey"
+            columns: ["organization_id", "unavailability_type_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_unavailability_types"
+            referencedColumns: ["organization_id", "id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailabilities_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailabilities_updated_by_membership_fkey"
+            columns: ["organization_id", "updated_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailabilities_vehicle_fkey"
+            columns: ["organization_id", "vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["organization_id", "id"]
+          },
+        ]
+      }
+      vehicle_unavailability_types: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          organization_id: string
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          organization_id: string
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          organization_id?: string
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_unavailability_types_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailability_types_created_by_membership_fkey"
+            columns: ["organization_id", "created_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["organization_id", "profile_id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailability_types_organization_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailability_types_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_unavailability_types_updated_by_membership_fkey"
             columns: ["organization_id", "updated_by"]
             isOneToOne: false
             referencedRelation: "organization_members"
@@ -960,6 +1331,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       organization_member_status: ["invited", "active", "blocked"],

@@ -34,6 +34,25 @@ export default async function OrganizationDashboardPage({
 
         {context.membership.role === "admin" ||
         context.membership.role === "coordinator" ? (
+          <>
+          <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-zinc-950">Planejamento</h2>
+            <p className="mt-1 text-sm text-zinc-600">
+              Organize a disponibilidade dos recursos operacionais.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Link
+                href={`/app/${organizationSlug}/planejamento/indisponibilidades`}
+                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
+              >
+                <span className="font-semibold text-zinc-950">Indisponibilidades</span>
+                <span className="mt-1 block text-sm text-zinc-600">
+                  Períodos indisponíveis de técnicos e veículos.
+                </span>
+              </Link>
+            </div>
+          </section>
+
           <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold text-zinc-950">Cadastros</h2>
             <p className="mt-1 text-sm text-zinc-600">
@@ -89,8 +108,20 @@ export default async function OrganizationDashboardPage({
                   Categorias para os atendimentos futuros.
                 </span>
               </Link>
+              <Link
+                href={`/app/${organizationSlug}/cadastros/tipos-indisponibilidade`}
+                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
+              >
+                <span className="font-semibold text-zinc-950">
+                  Tipos de indisponibilidade
+                </span>
+                <span className="mt-1 block text-sm text-zinc-600">
+                  Motivos configuráveis para técnicos e veículos.
+                </span>
+              </Link>
             </div>
           </section>
+          </>
         ) : null}
       </div>
     </main>
