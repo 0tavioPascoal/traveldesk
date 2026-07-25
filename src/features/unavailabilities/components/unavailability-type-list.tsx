@@ -1,45 +1,36 @@
 import Link from "next/link";
 
+import { ActiveStatusBadge } from "@/components/ui/active-status-badge";
+import { buttonStyles } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { NoResultsState } from "@/components/ui/no-results-state";
 import { UnavailabilityTypeStatusAction } from "@/features/unavailabilities/components/unavailability-type-status-action";
 import type { UnavailabilityResourceKind, UnavailabilityTypeItem } from "@/features/unavailabilities/types/unavailability";
 
 function formatUpdatedAt(value: string, timezone: string) {
-  return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: timezone }).format(new Date(value));
+  try {
+    return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: timezone }).format(new Date(value));
+  } catch {
+    return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+  }
 }
 
-export function UnavailabilityTypeList({
-  organizationSlug,
-  resource,
-  items,
-  timezone,
-  hasFilters,
-}: {
-  organizationSlug: string;
-  resource: UnavailabilityResourceKind;
-  items: UnavailabilityTypeItem[];
-  timezone: string;
-  hasFilters: boolean;
-}) {
-  const category = resource === "technicians" ? "tecnicos" : "veiculos";
+export function UnavailabilityTypeList({ organizationSlug, resource, items, timezone, hasFilters }: { organizationSlug: string; resource: UnavailabilityResourceKind; items: UnavailabilityTypeItem[]; timezone: string; hasFilters: boolean }) {
+  const technicians = resource === "technicians";
+  const category = technicians ? "tecnicos" : "veiculos";
   const base = `/app/${organizationSlug}/cadastros/tipos-indisponibilidade/${category}`;
   if (items.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-10 text-center">
-        <h2 className="font-semibold">{hasFilters ? "Nenhum tipo encontrado" : "Nenhum tipo cadastrado"}</h2>
-        <p className="mt-2 text-sm text-zinc-600">{hasFilters ? "Altere ou limpe os filtros." : "Cadastre o primeiro tipo desta categoria."}</p>
-        {!hasFilters ? <Link href={`${base}/novo`} className="mt-4 inline-flex h-10 items-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white">Novo tipo</Link> : null}
-      </div>
-    );
+    return hasFilters ? <NoResultsState description="Revise a pesquisa ou limpe os filtros." action={{ href: base, label: "Limpar filtros" }} /> : <EmptyState title={technicians ? "Nenhum tipo para técnicos cadastrado" : "Nenhum tipo para veículos cadastrado"} description={technicians ? "Cadastre motivos como férias, folgas, treinamentos ou afastamentos." : "Cadastre motivos como manutenção, documentação ou bloqueios operacionais."} action={{ href: `${base}/novo`, label: technicians ? "Novo tipo para técnico" : "Novo tipo para veículo" }} />;
   }
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-      <div className="hidden overflow-x-auto md:block">
-        <table className="w-full text-left">
-          <thead className="bg-zinc-50 text-xs uppercase text-zinc-600"><tr><th className="px-4 py-3">Nome</th><th className="px-4 py-3">Descrição</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Atualizado em</th><th className="px-4 py-3">Ações</th></tr></thead>
-          <tbody className="divide-y">{items.map((item) => <tr key={item.id}><td className="px-4 py-4 font-semibold">{item.name}</td><td className="max-w-md px-4 py-4 text-sm text-zinc-600">{item.description ?? "—"}</td><td className="px-4 py-4"><span className={item.active ? "rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800" : "rounded-full bg-zinc-200 px-2.5 py-1 text-xs font-semibold text-zinc-700"}>{item.active ? "Ativo" : "Inativo"}</span></td><td className="whitespace-nowrap px-4 py-4 text-sm text-zinc-600">{formatUpdatedAt(item.updated_at, timezone)}</td><td className="px-4 py-4"><div className="flex items-start gap-3"><Link href={`${base}/${item.id}/editar`} className="text-sm font-medium">Editar</Link><UnavailabilityTypeStatusAction organizationSlug={organizationSlug} resource={resource} typeId={item.id} active={item.active} /></div></td></tr>)}</tbody>
+    <>
+      <div className="hidden overflow-hidden rounded-2xl border border-border bg-card lg:block">
+        <table className="w-full table-fixed text-left text-sm">
+          <thead className="border-b border-border bg-muted/70 text-xs uppercase tracking-wide text-muted-foreground"><tr><th scope="col" className="w-1/4 px-4 py-3 font-semibold">Tipo</th><th scope="col" className="px-4 py-3 font-semibold">Descrição</th><th scope="col" className="w-28 px-4 py-3 font-semibold">Situação</th><th scope="col" className="w-40 px-4 py-3 font-semibold">Atualização</th><th scope="col" className="w-44 px-4 py-3 text-right font-semibold">Ações</th></tr></thead>
+          <tbody className="divide-y divide-border">{items.map((item) => <tr key={item.id} className="transition-colors hover:bg-muted/40"><td className="px-4 py-3 font-semibold text-card-foreground">{item.name}</td><td className="px-4 py-3 text-muted-foreground"><p className="line-clamp-2" title={item.description ?? undefined}>{item.description ?? "Sem descrição"}</p></td><td className="px-4 py-3"><ActiveStatusBadge active={item.active} /></td><td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatUpdatedAt(item.updated_at, timezone)}</td><td className="px-4 py-3"><div className="flex items-center justify-end gap-4"><Link href={`${base}/${item.id}/editar`} className="text-sm font-semibold text-primary hover:underline">Editar</Link><UnavailabilityTypeStatusAction organizationSlug={organizationSlug} resource={resource} typeId={item.id} active={item.active} /></div></td></tr>)}</tbody>
         </table>
       </div>
-      <div className="divide-y md:hidden">{items.map((item) => <article key={item.id} className="space-y-3 p-4"><div className="flex items-start justify-between gap-3"><h2 className="font-semibold">{item.name}</h2><span className={item.active ? "rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800" : "rounded-full bg-zinc-200 px-2.5 py-1 text-xs font-semibold text-zinc-700"}>{item.active ? "Ativo" : "Inativo"}</span></div><p className="text-sm text-zinc-600">{item.description ?? "Sem descrição"}</p><div className="flex gap-3 border-t pt-3"><Link href={`${base}/${item.id}/editar`} className="text-sm font-medium">Editar</Link><UnavailabilityTypeStatusAction organizationSlug={organizationSlug} resource={resource} typeId={item.id} active={item.active} /></div></article>)}</div>
-    </div>
+      <div className="space-y-3 lg:hidden">{items.map((item) => <article key={item.id} className="rounded-2xl border border-border bg-card p-4"><div className="flex items-start justify-between gap-3"><h2 className="min-w-0 break-words font-semibold text-card-foreground">{item.name}</h2><ActiveStatusBadge active={item.active} /></div><p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground" title={item.description ?? undefined}>{item.description ?? "Sem descrição"}</p><p className="mt-3 text-xs text-subtle-foreground">Atualizado em {formatUpdatedAt(item.updated_at, timezone)}</p><div className="mt-4 flex items-center justify-end gap-4 border-t border-border pt-3"><Link href={`${base}/${item.id}/editar`} className={buttonStyles({ variant: "ghost", size: "sm" })}>Editar</Link><UnavailabilityTypeStatusAction organizationSlug={organizationSlug} resource={resource} typeId={item.id} active={item.active} /></div></article>)}</div>
+    </>
   );
 }

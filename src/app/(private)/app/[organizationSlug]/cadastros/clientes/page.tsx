@@ -1,5 +1,8 @@
 import Link from "next/link";
 
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
+import { buttonStyles } from "@/components/ui/button";
 import { ClientFilters } from "@/features/clients/components/client-filters";
 import { ClientList } from "@/features/clients/components/client-list";
 import { listClients } from "@/features/clients/queries/list-clients";
@@ -23,15 +26,10 @@ export default async function ClientsPage({ params, searchParams }: ClientsPageP
   const hasFilters = filters.query !== "" || filters.status !== "all";
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <Link href={`/app/${organizationSlug}/dashboard`} className="text-sm font-medium text-zinc-600 hover:text-zinc-950">← Voltar ao dashboard</Link>
-          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><p className="text-sm font-medium text-zinc-500">{context.organization.name}</p><h1 className="mt-1 text-2xl font-bold text-zinc-950">Clientes</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">Gerencie clientes e suas unidades operacionais.</p></div><Link href={`/app/${organizationSlug}/cadastros/clientes/novo`} className="inline-flex h-11 items-center justify-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800">Novo cliente</Link></div>
-        </header>
-        <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm"><ClientFilters organizationSlug={organizationSlug} filters={filters} /></section>
+    <PageContainer className="space-y-6">
+        <PageHeader title="Clientes" description="Gerencie os clientes e suas unidades de atendimento." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Cadastros" }, { label: "Clientes" }]} actions={<Link href={`/app/${organizationSlug}/cadastros/clientes/novo`} className={`${buttonStyles()} w-full sm:w-auto`}>Novo cliente</Link>} />
+        <section aria-label="Pesquisa e filtros" className="rounded-2xl border border-border bg-card p-4 sm:p-5"><ClientFilters organizationSlug={organizationSlug} filters={filters} /></section>
         <ClientList organizationSlug={organizationSlug} clients={clients} timezone={context.organization.timezone} hasFilters={hasFilters} />
-      </div>
-    </main>
+    </PageContainer>
   );
 }

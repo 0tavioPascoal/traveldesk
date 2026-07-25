@@ -25,6 +25,40 @@ export type Vehicle = Pick<
 
 export type VehicleListItem = Omit<Vehicle, "notes">;
 
+export type VehicleUnavailabilityPeriod = {
+  id: string;
+  typeName: string;
+  startsAt: string;
+  endsAt: string;
+  allDay: boolean;
+  reason: string | null;
+};
+
+export type VehicleReservation = {
+  tripId: string;
+  code: string;
+  title: string;
+  clientName: string;
+  status: Database["public"]["Enums"]["trip_status"];
+  startsAt: string;
+  endsAt: string;
+};
+
+export type VehicleOperationalPeriods = {
+  unavailabilities: VehicleUnavailabilityPeriod[];
+  reservations: VehicleReservation[];
+};
+
+export type VehicleAvailabilitySummary = {
+  kind: "unavailability_current" | "unavailability_future" | "reservation_current" | "reservation_future";
+  startsAt: string;
+  endsAt: string;
+};
+
+export type VehicleListViewItem = VehicleListItem & {
+  availability: VehicleAvailabilitySummary | null;
+};
+
 export type ActiveVehicle = Pick<
   Vehicle,
   "id" | "plate" | "brand" | "model" | "operational_status"
@@ -40,6 +74,16 @@ export type VehicleFilters = {
   activeState: "all" | "active" | "inactive";
   operationalStatus: "all" | VehicleOperationalStatus;
   baseState: string;
+  minimumCapacity: string;
+  page: number;
+};
+
+export type VehicleListResult = {
+  items: VehicleListViewItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 };
 
 export type VehicleFormValues = {

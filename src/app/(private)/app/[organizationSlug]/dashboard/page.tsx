@@ -1,129 +1,48 @@
+import { ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
-import { LogoutButton } from "@/features/auth/components/logout-button";
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
+import { Badge } from "@/components/ui/badge";
+import { buttonStyles } from "@/components/ui/button";
+import { DashboardAttention } from "@/features/dashboard/components/dashboard-attention";
+import { DashboardMetrics } from "@/features/dashboard/components/dashboard-metrics";
+import { DashboardQuickActions } from "@/features/dashboard/components/dashboard-quick-actions";
+import { DashboardResourceSummary } from "@/features/dashboard/components/dashboard-resource-summary";
+import { DashboardTripSection } from "@/features/dashboard/components/dashboard-trip-section";
+import { getOperationalDashboard } from "@/features/dashboard/queries/get-operational-dashboard";
 import { requireOrganizationMember } from "@/features/organizations/application/require-organization-member";
-import { CurrentOrganization } from "@/features/organizations/components/current-organization";
+import { organizationRoleLabels } from "@/features/organizations/types/organization";
 
-type OrganizationDashboardPageProps = {
-  params: Promise<{ organizationSlug: string }>;
-};
+type OrganizationDashboardPageProps = { params: Promise<{ organizationSlug: string }> };
 
-export default async function OrganizationDashboardPage({
-  params,
-}: OrganizationDashboardPageProps) {
+export default async function OrganizationDashboardPage({ params }: OrganizationDashboardPageProps) {
   const { organizationSlug } = await params;
   const context = await requireOrganizationMember(organizationSlug);
 
+  if (context.membership.role === "technician") {
+    return (
+      <PageContainer className="max-w-6xl space-y-6">
+        <PageHeader title="Visão geral" eyebrow={context.organization.name} description="Seu acesso segue as permissões operacionais atribuídas nesta organização." />
+        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6"><div className="flex items-start gap-4"><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground"><ShieldCheck aria-hidden="true" className="size-5" /></span><div><div className="flex flex-wrap items-center gap-2"><h2 className="text-lg font-semibold text-card-foreground">Acesso técnico</h2><Badge tone="neutral">{organizationRoleLabels[context.membership.role]}</Badge></div><p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">Os indicadores consolidados de planejamento são restritos aos papéis administrativos. Nenhum dado operacional de outras pessoas ou recursos foi carregado nesta página.</p></div></div></section>
+      </PageContainer>
+    );
+  }
+
+  const data = await getOperationalDashboard(organizationSlug);
+  const dateLabel = new Intl.DateTimeFormat("pt-BR", { dateStyle: "full", timeZone: data.timezone }).format(new Date(data.referenceTime));
+
   return (
-    <main className="min-h-screen flex-1 bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        <header className="flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-          <CurrentOrganization context={context} />
-          <LogoutButton />
-        </header>
-
-        <section className="mt-6 rounded-2xl border border-dashed border-zinc-300 bg-white/60 p-8 text-center">
-          <h2 className="text-lg font-semibold text-zinc-950">
-            Dashboard em preparação
-          </h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-zinc-600">
-            A organização ativa foi validada no servidor. Os módulos de
-            gestão serão adicionados nas próximas etapas.
-          </p>
-        </section>
-
-        {context.membership.role === "admin" ||
-        context.membership.role === "coordinator" ? (
-          <>
-          <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-zinc-950">Planejamento</h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              Organize a disponibilidade dos recursos operacionais.
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <Link
-                href={`/app/${organizationSlug}/planejamento/indisponibilidades`}
-                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
-              >
-                <span className="font-semibold text-zinc-950">Indisponibilidades</span>
-                <span className="mt-1 block text-sm text-zinc-600">
-                  Períodos indisponíveis de técnicos e veículos.
-                </span>
-              </Link>
-            </div>
-          </section>
-
-          <section className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-zinc-950">Cadastros</h2>
-            <p className="mt-1 text-sm text-zinc-600">
-              Configure os dados mestres usados pela organização.
-            </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <Link
-                href={`/app/${organizationSlug}/cadastros/veiculos`}
-                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
-              >
-                <span className="font-semibold text-zinc-950">Veículos</span>
-                <span className="mt-1 block text-sm text-zinc-600">
-                  Frota, capacidade e condição operacional.
-                </span>
-              </Link>
-              <Link
-                href={`/app/${organizationSlug}/cadastros/tecnicos`}
-                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
-              >
-                <span className="font-semibold text-zinc-950">Técnicos</span>
-                <span className="mt-1 block text-sm text-zinc-600">
-                  Profissionais, especialidades e aptidão para condução.
-                </span>
-              </Link>
-              <Link
-                href={`/app/${organizationSlug}/cadastros/clientes`}
-                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
-              >
-                <span className="font-semibold text-zinc-950">Clientes</span>
-                <span className="mt-1 block text-sm text-zinc-600">
-                  Empresas atendidas e suas unidades.
-                </span>
-              </Link>
-              <Link
-                href={`/app/${organizationSlug}/cadastros/especialidades`}
-                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
-              >
-                <span className="font-semibold text-zinc-950">
-                  Especialidades
-                </span>
-                <span className="mt-1 block text-sm text-zinc-600">
-                  Áreas de conhecimento técnico.
-                </span>
-              </Link>
-              <Link
-                href={`/app/${organizationSlug}/cadastros/tipos-atendimento`}
-                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
-              >
-                <span className="font-semibold text-zinc-950">
-                  Tipos de atendimento
-                </span>
-                <span className="mt-1 block text-sm text-zinc-600">
-                  Categorias para os atendimentos futuros.
-                </span>
-              </Link>
-              <Link
-                href={`/app/${organizationSlug}/cadastros/tipos-indisponibilidade`}
-                className="rounded-xl border border-zinc-200 p-4 transition hover:border-zinc-400 hover:bg-zinc-50"
-              >
-                <span className="font-semibold text-zinc-950">
-                  Tipos de indisponibilidade
-                </span>
-                <span className="mt-1 block text-sm text-zinc-600">
-                  Motivos configuráveis para técnicos e veículos.
-                </span>
-              </Link>
-            </div>
-          </section>
-          </>
-        ) : null}
+    <PageContainer className="max-w-7xl space-y-6">
+      <PageHeader title="Visão geral" eyebrow={context.organization.name} description={`Acompanhe o planejamento e a operação em ${dateLabel}.`} actions={<Link href={`/app/${organizationSlug}/planejamento/viagens/nova`} className={`${buttonStyles()} w-full sm:w-auto`}>Nova viagem</Link>} />
+      <DashboardMetrics organizationSlug={organizationSlug} data={data} />
+      <DashboardAttention organizationSlug={organizationSlug} data={data} />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <DashboardTripSection organizationSlug={organizationSlug} title="Em execução" description="Viagens que já iniciaram o fluxo operacional." emptyMessage="Nenhuma viagem em execução no momento." trips={data.activeTrips} timezone={data.timezone} />
+        <DashboardTripSection organizationSlug={organizationSlug} title="Próximas viagens" description="Planejadas ou confirmadas com período futuro." emptyMessage="Nenhuma próxima viagem planejada ou confirmada." trips={data.upcomingTrips} timezone={data.timezone} />
       </div>
-    </main>
+      <DashboardResourceSummary organizationSlug={organizationSlug} data={data} />
+      <DashboardQuickActions organizationSlug={organizationSlug} />
+    </PageContainer>
   );
 }

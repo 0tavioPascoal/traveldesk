@@ -13,6 +13,25 @@ export type OrganizationSummary = Pick<
   "id" | "name" | "slug" | "timezone"
 >;
 
+export type OrganizationAdministrationDetails = Pick<
+  Tables<"organizations">,
+  | "name"
+  | "legal_name"
+  | "tax_id"
+  | "slug"
+  | "timezone"
+  | "active"
+  | "created_at"
+  | "updated_at"
+>;
+
+export type CurrentOrganizationMemberDetails = Pick<
+  Tables<"organization_members">,
+  "role" | "status" | "created_at" | "updated_at"
+> & {
+  profile: Pick<Tables<"profiles">, "name" | "email">;
+};
+
 export type UserOrganization = OrganizationSummary & {
   membershipId: string;
   role: OrganizationRole;
@@ -32,4 +51,19 @@ export const organizationRoleLabels: Record<OrganizationRole, string> = {
   admin: "Administrador",
   coordinator: "Coordenador",
   technician: "Técnico",
+};
+
+export const organizationMemberStatusLabels: Record<
+  OrganizationMemberStatus,
+  string
+> = {
+  invited: "Convidado",
+  active: "Ativo",
+  blocked: "Bloqueado",
+};
+
+export const organizationRoleDescriptions: Record<OrganizationRole, string> = {
+  admin: "Possui acesso administrativo e operacional à organização.",
+  coordinator: "Gerencia os cadastros e o planejamento operacional permitido.",
+  technician: "Possui acesso restrito às operações liberadas para técnicos.",
 };

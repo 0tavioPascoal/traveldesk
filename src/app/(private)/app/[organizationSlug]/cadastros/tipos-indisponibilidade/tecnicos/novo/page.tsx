@@ -1,5 +1,5 @@
-import Link from "next/link";
-
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { UnavailabilityTypeForm } from "@/features/unavailabilities/components/unavailability-type-form";
 
@@ -7,5 +7,5 @@ export default async function NewTechnicianUnavailabilityTypePage({ params }: { 
   const { organizationSlug } = await params;
   await requireOrganizationRole(organizationSlug, ["admin", "coordinator"] as const);
   const path = `/app/${organizationSlug}/cadastros/tipos-indisponibilidade/tecnicos`;
-  return <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6"><div className="mx-auto max-w-3xl"><Link href={path} className="text-sm font-medium text-zinc-600">← Voltar aos tipos</Link><div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"><h1 className="text-2xl font-bold">Novo tipo para técnico</h1><p className="mt-1 text-sm text-zinc-600">Cadastre um motivo configurável da organização.</p><div className="mt-6"><UnavailabilityTypeForm organizationSlug={organizationSlug} resource="technicians" initialValues={{ name: "", description: "", active: true }} /></div></div></div></main>;
+  return <PageContainer className="max-w-3xl space-y-6"><PageHeader title="Novo tipo para técnico" description="Cadastre um motivo utilizado nas indisponibilidades de técnicos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Tipos de indisponibilidade", href: path }, { label: "Novo tipo para técnico" }]} /><section className="rounded-2xl border border-border bg-card p-5 sm:p-6"><UnavailabilityTypeForm organizationSlug={organizationSlug} resource="technicians" initialValues={{ name: "", description: "", active: true }} /></section></PageContainer>;
 }

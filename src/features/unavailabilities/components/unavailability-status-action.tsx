@@ -1,35 +1,23 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef } from "react";
 
+import { buttonStyles } from "@/components/ui/button";
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { changeTechnicianUnavailabilityStatusAction } from "@/features/unavailabilities/actions/change-technician-unavailability-status-action";
 import { changeVehicleUnavailabilityStatusAction } from "@/features/unavailabilities/actions/change-vehicle-unavailability-status-action";
 import type { UnavailabilityQuickActionState, UnavailabilityResourceKind } from "@/features/unavailabilities/types/unavailability";
 
-export function UnavailabilityStatusAction({
-  organizationSlug,
-  resource,
-  id,
-  active,
-}: {
-  organizationSlug: string;
-  resource: UnavailabilityResourceKind;
-  id: string;
-  active: boolean;
-}) {
-  const [confirming, setConfirming] = useState(false);
+export function UnavailabilityStatusAction({ organizationSlug, resource, id, active, resourceName, triggerClassName }: { organizationSlug: string; resource: UnavailabilityResourceKind; id: string; active: boolean; resourceName: string; triggerClassName?: string }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const action = resource === "technicians"
     ? changeTechnicianUnavailabilityStatusAction.bind(null, organizationSlug, id, !active)
     : changeVehicleUnavailabilityStatusAction.bind(null, organizationSlug, id, !active);
-  const [state, formAction, pending] = useActionState(action, {
-    status: "idle", message: null,
-  } satisfies UnavailabilityQuickActionState);
-  if (active && !confirming) return <button type="button" onClick={() => setConfirming(true)} className="text-sm font-medium text-red-700">Inativar</button>;
-  return (
-    <form action={formAction} className="space-y-1">
-      {active ? <p className="text-xs text-red-800">Este período deixará de bloquear o recurso. Confirmar?</p> : null}
-      <div className="flex gap-2"><button type="submit" disabled={pending} className={active ? "text-sm font-semibold text-red-700 disabled:opacity-60" : "text-sm font-semibold text-emerald-700 disabled:opacity-60"}>{pending ? "Salvando..." : active ? "Confirmar" : "Reativar"}</button>{active ? <button type="button" disabled={pending} onClick={() => setConfirming(false)} className="text-sm text-zinc-600">Cancelar</button> : null}</div>
-      {state.message ? <p role={state.status === "error" ? "alert" : "status"} className="max-w-72 text-xs text-zinc-600">{state.message}</p> : null}
-    </form>
-  );
+  const [state, formAction, pending] = useActionState(action, { status: "idle", message: null } satisfies UnavailabilityQuickActionState);
+  const title = active ? "Inativar indisponibilidade?" : "Reativar indisponibilidade?";
+  const description = active
+    ? "Este período deixará de bloquear novas alocações, mas permanecerá disponível no histórico."
+    : "O recurso voltará a ser considerado indisponível durante o período registrado. As validações existentes serão aplicadas.";
+
+  return <><button type="button" onClick={() => dialogRef.current?.showModal()} className={triggerClassName ?? buttonStyles({ variant: active ? "destructive" : "primary", size: "sm" })}>{active ? "Inativar" : "Reativar"}</button><dialog ref={dialogRef} aria-labelledby={`unavailability-status-${id}`} className="m-auto w-[min(30rem,calc(100%-2rem))] rounded-2xl border border-border bg-popover p-0 text-popover-foreground shadow-2xl" onClick={(event) => { if (event.target === dialogRef.current) dialogRef.current?.close(); }}><form action={formAction} className="space-y-5 p-5 sm:p-6"><div><h2 id={`unavailability-status-${id}`} className="text-lg font-semibold">{title}</h2><p className="mt-1 text-sm font-medium">{resourceName}</p><p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p></div>{state.message ? <InlineAlert tone={state.status === "error" ? "error" : "success"}>{state.message}</InlineAlert> : null}<div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><button type="button" disabled={pending} onClick={() => dialogRef.current?.close()} className={buttonStyles({ variant: "secondary" })}>Cancelar</button><button type="submit" disabled={pending} className={buttonStyles({ variant: active ? "destructive" : "primary" })}>{pending ? "Aguarde..." : active ? "Confirmar inativação" : "Confirmar reativação"}</button></div></form></dialog></>;
 }

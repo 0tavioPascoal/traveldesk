@@ -1,21 +1,68 @@
 import Link from "next/link";
-import { TechnicianStatusAction } from "@/features/technicians/components/technician-status-action";
+import { Car, MapPin } from "lucide-react";
+
+import { ActiveStatusBadge } from "@/components/ui/active-status-badge";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { NoResultsState } from "@/components/ui/no-results-state";
+import { getTechnicianLicenseState, technicianLicenseLabel, formatDateOnly } from "@/features/technicians/application/technician-presentation";
+import { TechnicianRowActions } from "@/features/technicians/components/technician-row-actions";
 import type { TechnicianListItem } from "@/features/technicians/types/technician";
 
-function date(value: string, timezone: string) { try { return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: timezone }).format(new Date(value)); } catch { return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" }).format(new Date(value)); } }
-function driving(technician: TechnicianListItem) { if (!technician.can_drive_company_vehicle) return "Não"; const today = new Date().toISOString().slice(0, 10); return technician.driver_license_expires_at && technician.driver_license_expires_at >= today ? "Sim" : "CNH vencida"; }
-function Badge({ active }: { active: boolean }) { return <span className={active ? "rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800" : "rounded-full bg-zinc-200 px-2.5 py-1 text-xs font-semibold text-zinc-700"}>{active ? "Ativo" : "Inativo"}</span>; }
-function SkillBadges({ technician }: { technician: TechnicianListItem }) { return <div className="flex max-w-xs flex-wrap gap-1">{technician.skills.length ? technician.skills.map((skill) => <span key={skill.skillId} className="rounded bg-zinc-100 px-2 py-1 text-xs text-zinc-700">{skill.skillName}{skill.isPrimary ? " ★" : ""}</span>) : <span className="text-sm text-zinc-500">—</span>}</div>; }
+function formatCpf(value: string | null) {
+  return value?.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, "$1.$2.$3-$4") ?? null;
+}
 
-export function TechnicianList({ organizationSlug, technicians, timezone, hasFilters }: { organizationSlug: string; technicians: TechnicianListItem[]; timezone: string; hasFilters: boolean }) {
+function Secondary({ technician }: { technician: TechnicianListItem }) {
+  return <p className="mt-1 truncate text-sm text-muted-foreground">{technician.email ?? formatCpf(technician.document) ?? technician.job_title ?? "Sem contato informado"}</p>;
+}
+
+function Skills({ technician }: { technician: TechnicianListItem }) {
+  if (technician.skills.length === 0) return <span className="text-sm text-muted-foreground">Nenhuma especialidade</span>;
+  const shown = technician.skills.slice(0, 2);
+  const remaining = technician.skills.slice(2);
+  return <div className="flex flex-wrap gap-1.5">{shown.map((skill) => <Badge key={skill.skillId} tone={skill.isPrimary ? "primary" : "neutral"} className={!skill.skillActive ? "opacity-60" : ""}>{skill.skillName}{skill.isPrimary ? " · Principal" : ""}</Badge>)}{remaining.length ? <span title={remaining.map((skill) => skill.skillName).join(", ")}><Badge tone="neutral">+{remaining.length}</Badge></span> : null}</div>;
+}
+
+function License({ technician, referenceDate }: { technician: TechnicianListItem; referenceDate: string }) {
+  const state = getTechnicianLicenseState(technician, referenceDate);
+  if (state === "not_authorized") return <span className="text-sm text-muted-foreground">Não autorizado a dirigir</span>;
+  return <div className="text-sm"><p className="font-medium text-foreground">{technicianLicenseLabel(state)}</p><p className="mt-0.5 text-muted-foreground">{technician.driver_license_category ? `Categoria ${technician.driver_license_category}` : "Categoria não informada"}{technician.driver_license_expires_at ? ` · até ${formatDateOnly(technician.driver_license_expires_at)}` : ""}</p></div>;
+}
+
+function Availability({ technician, timezone }: { technician: TechnicianListItem; timezone: string }) {
+  if (!technician.availability) return <p className="text-sm font-medium text-success">Sem indisponibilidade</p>;
+  const format = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeZone: timezone });
+  if (technician.availability.kind === "current") return <div><p className="text-sm font-medium text-warning">Indisponível</p><p className="mt-0.5 text-xs text-muted-foreground">até {format.format(new Date(technician.availability.endsAt))}</p></div>;
+  return <div><p className="text-sm font-medium text-foreground">Indisponibilidade futura</p><p className="mt-0.5 text-xs text-muted-foreground">em {format.format(new Date(technician.availability.startsAt))}</p></div>;
+}
+
+export function TechnicianList({ organizationSlug, technicians, timezone, referenceDate, hasFilters }: { organizationSlug: string; technicians: TechnicianListItem[]; timezone: string; referenceDate: string; hasFilters: boolean }) {
   const base = `/app/${organizationSlug}/cadastros/tecnicos`;
-  if (technicians.length === 0) return <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-10 text-center"><h2 className="font-semibold">{hasFilters ? "Nenhum técnico encontrado" : "Nenhum técnico cadastrado"}</h2><p className="mt-2 text-sm text-zinc-600">{hasFilters ? "Altere ou limpe os filtros." : "Cadastre o primeiro técnico da organização."}</p>{!hasFilters ? <Link href={`${base}/novo`} className="mt-4 inline-flex h-10 items-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white">Novo técnico</Link> : null}</div>;
-  return <><div className="hidden overflow-x-auto rounded-xl border border-zinc-200 md:block"><table className="w-full min-w-[1050px] text-left"><thead className="bg-zinc-50 text-xs uppercase text-zinc-600"><tr>{["Técnico","Cidade-base","Especialidades","Pode dirigir","Status","Atualizado em","Ações"].map((title) => <th key={title} className="px-4 py-3">{title}</th>)}</tr></thead><tbody className="divide-y bg-white">{technicians.map((technician) => <tr key={technician.id}>
-    <td className="px-4 py-4 align-top"><p className="font-semibold text-zinc-950">{technician.name}</p><p className="text-sm text-zinc-500">{technician.job_title ?? "Sem cargo informado"}</p></td>
-    <td className="px-4 py-4 align-top text-sm text-zinc-700">{technician.base_city}/{technician.base_state}</td>
-    <td className="px-4 py-4 align-top"><SkillBadges technician={technician} /></td>
-    <td className="px-4 py-4 align-top text-sm text-zinc-700">{driving(technician)}</td>
-    <td className="px-4 py-4 align-top"><Badge active={technician.active} /></td>
-    <td className="whitespace-nowrap px-4 py-4 text-sm text-zinc-600">{date(technician.updated_at, timezone)}</td><td className="px-4 py-4"><div className="flex gap-3"><Link href={`${base}/${technician.id}`} className="text-sm font-medium">Abrir</Link><Link href={`${base}/${technician.id}/editar`} className="text-sm font-medium">Editar</Link><TechnicianStatusAction organizationSlug={organizationSlug} technicianId={technician.id} active={technician.active} /></div></td></tr>)}</tbody></table></div>
-    <div className="space-y-3 md:hidden">{technicians.map((technician) => <article key={technician.id} className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4"><div className="flex justify-between gap-3"><div><h2 className="font-semibold">{technician.name}</h2><p className="text-sm text-zinc-500">{technician.job_title ?? `${technician.base_city}/${technician.base_state}`}</p></div><Badge active={technician.active} /></div><div className="flex flex-wrap gap-1">{technician.skills.map((skill) => <span key={skill.skillId} className="rounded bg-zinc-100 px-2 py-1 text-xs">{skill.skillName}</span>)}</div><p className="text-sm">Pode dirigir: {driving(technician)}</p><div className="flex gap-3 border-t pt-3"><Link href={`${base}/${technician.id}`} className="text-sm font-medium">Abrir</Link><Link href={`${base}/${technician.id}/editar`} className="text-sm font-medium">Editar</Link><TechnicianStatusAction organizationSlug={organizationSlug} technicianId={technician.id} active={technician.active} /></div></article>)}</div></>;
+  if (technicians.length === 0) return hasFilters
+    ? <NoResultsState description="Revise os filtros ou limpe a pesquisa." action={{ href: base, label: "Limpar filtros" }} />
+    : <EmptyState title="Nenhum técnico cadastrado" description="Cadastre o primeiro técnico para começar a organizar as viagens e especialidades." action={{ href: `${base}/novo`, label: "Novo técnico" }} />;
+
+  return <>
+    <div className="hidden overflow-hidden rounded-2xl border border-border bg-card lg:block">
+      <table className="w-full table-fixed text-left">
+        <thead className="border-b border-border bg-muted/70 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><tr><th scope="col" className="w-[22%] px-4 py-3">Técnico</th><th scope="col" className="w-[22%] px-4 py-3">Especialidades</th><th scope="col" className="w-[13%] px-4 py-3">Localidade-base</th><th scope="col" className="w-[19%] px-4 py-3">Habilitação</th><th scope="col" className="w-[13%] px-4 py-3">Disponibilidade</th><th scope="col" className="w-[8%] px-4 py-3">Situação</th><th scope="col" className="w-[3%] px-2 py-3"><span className="sr-only">Ações</span></th></tr></thead>
+        <tbody className="divide-y divide-border">{technicians.map((technician) => <tr key={technician.id} className="align-top hover:bg-muted/30">
+          <td className="px-4 py-4"><Link href={`${base}/${technician.id}`} className="font-semibold text-foreground hover:text-primary hover:underline">{technician.name}</Link><Secondary technician={technician} /></td>
+          <td className="px-4 py-4"><Skills technician={technician} /></td>
+          <td className="px-4 py-4 text-sm text-foreground">{technician.base_city}/{technician.base_state}</td>
+          <td className="px-4 py-4"><License technician={technician} referenceDate={referenceDate} /></td>
+          <td className="px-4 py-4"><Availability technician={technician} timezone={timezone} /></td>
+          <td className="px-4 py-4"><ActiveStatusBadge active={technician.active} /></td>
+          <td className="px-2 py-3"><TechnicianRowActions organizationSlug={organizationSlug} technicianId={technician.id} technicianName={technician.name} active={technician.active} /></td>
+        </tr>)}</tbody>
+      </table>
+    </div>
+    <div className="grid gap-3 lg:hidden">{technicians.map((technician) => <article key={technician.id} className="rounded-2xl border border-border bg-card p-4">
+      <div className="flex items-start justify-between gap-3"><div className="min-w-0"><Link href={`${base}/${technician.id}`} className="font-semibold text-foreground hover:underline">{technician.name}</Link><Secondary technician={technician} /></div><ActiveStatusBadge active={technician.active} /></div>
+      <div className="mt-3"><Skills technician={technician} /></div>
+      <div className="mt-4 grid gap-2.5 text-sm sm:grid-cols-2"><p className="flex items-center gap-2 text-muted-foreground"><MapPin aria-hidden="true" className="size-4 shrink-0" /><span>{technician.base_city}/{technician.base_state}</span></p><div className="flex gap-2 text-muted-foreground"><Car aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><License technician={technician} referenceDate={referenceDate} /></div></div>
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3"><Availability technician={technician} timezone={timezone} /><TechnicianRowActions organizationSlug={organizationSlug} technicianId={technician.id} technicianName={technician.name} active={technician.active} /></div>
+    </article>)}</div>
+  </>;
 }

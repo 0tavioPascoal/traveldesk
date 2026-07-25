@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
+import { SectionHeader } from "@/components/page/section-header";
+import { buttonStyles } from "@/components/ui/button";
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { UnavailabilityTypeFilters } from "@/features/unavailabilities/components/unavailability-type-filters";
 import { UnavailabilityTypeList } from "@/features/unavailabilities/components/unavailability-type-list";
@@ -18,12 +23,13 @@ export default async function TechnicianUnavailabilityTypesPage({ params, search
   const path = `/app/${organizationSlug}/cadastros/tipos-indisponibilidade/tecnicos`;
   const feedback = typeof raw.feedback === "string" ? raw.feedback : null;
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6"><div className="mx-auto max-w-6xl space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><Link href={`/app/${organizationSlug}/dashboard`} className="text-sm font-medium text-zinc-600">← Voltar ao dashboard</Link><h1 className="mt-2 text-2xl font-bold">Tipos de indisponibilidade de técnicos</h1><p className="mt-1 text-sm text-zinc-600">Configure os motivos disponíveis para períodos de técnicos.</p></div><Link href={`${path}/novo`} className="inline-flex h-11 items-center justify-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white">Novo tipo</Link></header>
-      {feedback === "created" || feedback === "updated" ? <p role="status" className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">Tipo {feedback === "created" ? "cadastrado" : "atualizado"} com sucesso.</p> : null}
+    <PageContainer className="max-w-6xl space-y-6">
+      <PageHeader title="Tipos de indisponibilidade" description="Configure os motivos utilizados para bloquear técnicos e veículos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Cadastros" }, { label: "Tipos de indisponibilidade" }]} actions={<Link href={`${path}/novo`} className={`${buttonStyles()} w-full sm:w-auto`}>Novo tipo para técnico</Link>} />
+      {feedback === "created" || feedback === "updated" ? <InlineAlert tone="success">Tipo {feedback === "created" ? "cadastrado" : "atualizado"} com sucesso.</InlineAlert> : null}
       <UnavailabilityTypeTabs organizationSlug={organizationSlug} resource="technicians" />
-      <section className="rounded-xl border border-zinc-200 bg-white p-5"><UnavailabilityTypeFilters path={path} filters={filters} /></section>
+      <SectionHeader title="Tipos para técnicos" description="Motivos utilizados para bloquear técnicos em novos planejamentos." />
+      <section aria-label="Pesquisa e filtros" className="rounded-2xl border border-border bg-card p-5"><UnavailabilityTypeFilters path={path} filters={filters} /></section>
       <UnavailabilityTypeList organizationSlug={organizationSlug} resource="technicians" items={items} timezone={context.organization.timezone} hasFilters={Boolean(filters.query || filters.status !== "all")} />
-    </div></main>
+    </PageContainer>
   );
 }

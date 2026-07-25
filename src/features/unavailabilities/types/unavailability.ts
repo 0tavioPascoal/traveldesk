@@ -1,7 +1,9 @@
 import type { Tables } from "@/lib/supabase/database.types";
 
 export type UnavailabilityResourceKind = "technicians" | "vehicles";
+export type UnavailabilityResourceFilter = "all" | UnavailabilityResourceKind;
 export type UnavailabilityStatusFilter = "all" | "active" | "inactive";
+export type UnavailabilityTemporalFilter = "all" | "current" | "future" | "past";
 
 export type UnavailabilityTypeItem = Pick<
   Tables<"technician_unavailability_types">,
@@ -35,13 +37,15 @@ export type UnavailabilityFormValues = {
 };
 
 export type UnavailabilityFilters = {
-  resource: UnavailabilityResourceKind;
+  resource: UnavailabilityResourceFilter;
   query: string;
   startsOn: string;
   endsOn: string;
   resourceId: string;
   unavailabilityTypeId: string;
+  temporalStatus: UnavailabilityTemporalFilter;
   status: UnavailabilityStatusFilter;
+  page: number;
 };
 
 export type UnavailabilityListItem = {
@@ -57,6 +61,10 @@ export type UnavailabilityListItem = {
   reason: string | null;
   active: boolean;
   updatedAt: string;
+};
+
+export type CentralUnavailabilityListItem = UnavailabilityListItem & {
+  resourceKind: UnavailabilityResourceKind;
 };
 
 export type UnavailabilityDetails = UnavailabilityListItem & {
@@ -112,5 +120,7 @@ export type UnavailabilityMutationResult =
         | "past_edit_forbidden"
         | "not_found"
         | "invalid_period"
+        | "trip_conflict"
+        | "vehicle_trip_conflict"
         | "unexpected";
     };

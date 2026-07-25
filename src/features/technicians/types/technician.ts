@@ -12,14 +12,28 @@ export type TechnicianListItem = Pick<
   Tables<"technicians">,
   | "id"
   | "name"
+  | "document"
+  | "email"
   | "job_title"
   | "base_city"
   | "base_state"
   | "can_drive_company_vehicle"
+  | "driver_license_number"
+  | "driver_license_category"
   | "driver_license_expires_at"
   | "active"
   | "updated_at"
-> & { skills: TechnicianSkillAssignment[] };
+> & {
+  skills: TechnicianSkillAssignment[];
+  availability: TechnicianAvailabilitySummary | null;
+};
+
+export type TechnicianAvailabilitySummary = {
+  kind: "current" | "future";
+  startsAt: string;
+  endsAt: string;
+  typeName: string;
+};
 
 export type TechnicianDetails = Pick<
   Tables<"technicians">,
@@ -100,6 +114,15 @@ export type TechnicianFilters = {
   skillId: string;
   canDrive: "all" | "yes" | "no";
   baseState: string;
+  page: number;
+};
+
+export type TechnicianListResult = {
+  items: TechnicianListItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 };
 
 export type ActiveTechnician = {

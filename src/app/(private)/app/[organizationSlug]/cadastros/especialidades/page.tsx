@@ -1,5 +1,9 @@
 import Link from "next/link";
 
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
+import { buttonStyles } from "@/components/ui/button";
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { SkillFilters } from "@/features/skills/components/skill-filters";
 import { SkillList } from "@/features/skills/components/skill-list";
@@ -51,46 +55,14 @@ export default async function SkillsPage({
   const hasFilters = filters.query !== "" || filters.status !== "all";
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <header className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <Link
-            href={`/app/${organizationSlug}/dashboard`}
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-950"
-          >
-            ← Voltar ao dashboard
-          </Link>
-          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-medium text-zinc-500">
-                {context.organization.name}
-              </p>
-              <h1 className="mt-1 text-2xl font-bold text-zinc-950">
-                Especialidades
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
-                Gerencie as especialidades técnicas disponíveis nesta organização.
-              </p>
-            </div>
-            <Link
-              href={`/app/${organizationSlug}/cadastros/especialidades/nova`}
-              className="inline-flex h-11 items-center justify-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800"
-            >
-              Nova especialidade
-            </Link>
-          </div>
-        </header>
+    <PageContainer className="max-w-6xl space-y-6">
+        <PageHeader title="Especialidades" description="Gerencie as competências utilizadas na composição das equipes técnicas." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Cadastros" }, { label: "Especialidades" }]} actions={<Link href={`/app/${organizationSlug}/cadastros/especialidades/nova`} className={`${buttonStyles()} w-full sm:w-auto`}>Nova especialidade</Link>} />
 
         {feedback ? (
-          <p
-            role="status"
-            className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
-          >
-            {feedback}
-          </p>
+          <InlineAlert tone="success">{feedback}</InlineAlert>
         ) : null}
 
-        <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm">
+        <section aria-label="Pesquisa e filtros" className="rounded-2xl border border-border bg-card p-5">
           <SkillFilters organizationSlug={organizationSlug} filters={filters} />
         </section>
 
@@ -102,7 +74,6 @@ export default async function SkillsPage({
             hasFilters={hasFilters}
           />
         </section>
-      </div>
-    </main>
+    </PageContainer>
   );
 }

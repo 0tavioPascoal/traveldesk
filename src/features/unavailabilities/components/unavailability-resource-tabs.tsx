@@ -1,27 +1,45 @@
 import Link from "next/link";
 
-import type { UnavailabilityResourceKind } from "@/features/unavailabilities/types/unavailability";
+import type { UnavailabilityFilters, UnavailabilityResourceFilter } from "@/features/unavailabilities/types/unavailability";
+
+const options: Array<{ value: UnavailabilityResourceFilter; label: string }> = [
+  { value: "all", label: "Todas" },
+  { value: "technicians", label: "Técnicos" },
+  { value: "vehicles", label: "Veículos" },
+];
 
 export function UnavailabilityResourceTabs({
   organizationSlug,
-  resource,
+  filters,
 }: {
   organizationSlug: string;
-  resource: UnavailabilityResourceKind;
+  filters: UnavailabilityFilters;
 }) {
   const path = `/app/${organizationSlug}/planejamento/indisponibilidades`;
+  function href(resource: UnavailabilityResourceFilter) {
+    const params = new URLSearchParams();
+    if (resource !== "all") params.set("resource", resource);
+    if (filters.query) params.set("query", filters.query);
+    if (filters.startsOn) params.set("startsOn", filters.startsOn);
+    if (filters.endsOn) params.set("endsOn", filters.endsOn);
+    if (filters.temporalStatus !== "all") params.set("temporalStatus", filters.temporalStatus);
+    if (filters.status !== "all") params.set("status", filters.status);
+    const query = params.toString();
+    return `${path}${query ? `?${query}` : ""}`;
+  }
+
   return (
-    <nav aria-label="Tipo de recurso" className="flex gap-2 rounded-xl border border-zinc-200 bg-white p-2">
-      {(["technicians", "vehicles"] as const).map((item) => (
+    <nav aria-label="Tipo de recurso" className="inline-flex w-full rounded-xl border border-border bg-card p-1 sm:w-auto">
+      {options.map((option) => (
         <Link
-          key={item}
-          href={`${path}?resource=${item}`}
-          aria-current={resource === item ? "page" : undefined}
-          className={resource === item
-            ? "rounded-lg bg-zinc-950 px-4 py-2 text-sm font-semibold text-white"
-            : "rounded-lg px-4 py-2 text-sm font-semibold text-zinc-700 hover:bg-zinc-100"}
+          key={option.value}
+          href={href(option.value)}
+          aria-current={filters.resource === option.value ? "page" : undefined}
+          className={filters.resource === option.value
+            ? "flex min-h-10 flex-1 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground sm:flex-none"
+            : "flex min-h-10 flex-1 items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground sm:flex-none"}
         >
-          {item === "technicians" ? "Técnicos" : "Veículos"}
+          {option.label}
         </Link>
       ))}
     </nav>

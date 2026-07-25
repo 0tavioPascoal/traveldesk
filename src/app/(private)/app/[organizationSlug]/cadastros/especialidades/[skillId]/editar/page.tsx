@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
 import { SkillForm } from "@/features/skills/components/skill-form";
 import { getSkillById } from "@/features/skills/queries/get-skill-by-id";
 
@@ -19,23 +20,9 @@ export default async function EditSkillPage({ params }: EditSkillPageProps) {
   const listPath = `/app/${organizationSlug}/cadastros/especialidades`;
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-6">
-          <Link
-            href={listPath}
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-950"
-          >
-            ← Voltar para especialidades
-          </Link>
-          <h1 className="mt-5 text-2xl font-bold text-zinc-950">
-            Editar especialidade
-          </h1>
-          <p className="mt-2 text-sm text-zinc-600">
-            Atualize os dados e a disponibilidade deste cadastro.
-          </p>
-        </header>
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <PageContainer className="max-w-3xl space-y-6">
+        <PageHeader title="Editar especialidade" description="Atualize a competência e sua disponibilidade para novos vínculos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Especialidades", href: listPath }, { label: "Editar" }]} />
+        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
           <SkillForm
             organizationSlug={organizationSlug}
             skillId={skill.id}
@@ -46,7 +33,6 @@ export default async function EditSkillPage({ params }: EditSkillPageProps) {
             }}
           />
         </section>
-      </div>
-    </main>
+    </PageContainer>
   );
 }

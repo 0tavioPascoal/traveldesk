@@ -1,0 +1,5 @@
+import { Skeleton } from "@/components/ui/skeleton";
+
+export function UnavailabilitiesListSkeleton() {
+  return <div className="space-y-6" aria-label="Carregando indisponibilidades" role="status"><div className="space-y-3"><Skeleton className="h-8 w-52" /><Skeleton className="h-5 w-full max-w-xl" /></div><Skeleton className="h-12 w-full max-w-sm" /><div className="rounded-xl border border-border bg-card p-5"><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"><Skeleton className="h-11 xl:col-span-3" />{Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="h-11" />)}</div></div><div className="hidden overflow-hidden rounded-xl border border-border bg-card lg:block"><Skeleton className="h-12 rounded-none" />{Array.from({ length: 6 }, (_, index) => <Skeleton key={index} className="m-4 h-14" />)}</div><div className="space-y-3 lg:hidden">{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-44" />)}</div><span className="sr-only">Carregando indisponibilidades...</span></div>;
+}

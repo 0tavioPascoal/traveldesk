@@ -10,7 +10,9 @@ export type ClientDetails = Pick<
   | "notes"
   | "active"
   | "updated_at"
->;
+> & {
+  unitCount: number;
+};
 
 export type ClientListItem = Pick<
   ClientDetails,
@@ -20,9 +22,7 @@ export type ClientListItem = Pick<
   | "tax_id"
   | "active"
   | "updated_at"
-> & {
-  unitCount: number;
-};
+> & Pick<ClientDetails, "unitCount">;
 
 export type ClientUnit = Pick<
   Tables<"client_units">,

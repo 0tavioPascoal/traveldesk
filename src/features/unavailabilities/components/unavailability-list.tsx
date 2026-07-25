@@ -1,60 +1,61 @@
 import Link from "next/link";
+import { CalendarClock, CarFront, UserRound } from "lucide-react";
 
-import { UnavailabilityStatusAction } from "@/features/unavailabilities/components/unavailability-status-action";
-import type { UnavailabilityListItem, UnavailabilityResourceKind } from "@/features/unavailabilities/types/unavailability";
+import { ActiveStatusBadge } from "@/components/ui/active-status-badge";
+import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { NoResultsState } from "@/components/ui/no-results-state";
+import { UnavailabilityRowActions } from "@/features/unavailabilities/components/unavailability-row-actions";
+import type { CentralUnavailabilityListItem } from "@/features/unavailabilities/types/unavailability";
 
-function formatPeriod(item: UnavailabilityListItem, timezone: string) {
-  const date = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeZone: timezone });
-  const dateTime = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: timezone });
+function formatPeriod(item: CentralUnavailabilityListItem, timezone: string) {
+  const date = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: timezone });
+  const dateTime = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: timezone });
   if (item.allDay) {
     const visibleEnd = new Date(new Date(item.endsAt).getTime() - 1);
     const start = date.format(new Date(item.startsAt));
     const end = date.format(visibleEnd);
-    return start === end ? `${start} · dia inteiro` : `${start} a ${end} · dias inteiros`;
+    return start === end ? `${start} · dia inteiro` : `${start} → ${end} · dias inteiros`;
   }
-  return `${dateTime.format(new Date(item.startsAt))} a ${dateTime.format(new Date(item.endsAt))}`;
+  return `${dateTime.format(new Date(item.startsAt))} → ${dateTime.format(new Date(item.endsAt))}`;
 }
 
-function duration(item: UnavailabilityListItem) {
+function duration(item: CentralUnavailabilityListItem) {
   const milliseconds = new Date(item.endsAt).getTime() - new Date(item.startsAt).getTime();
-  if (item.allDay) return `${Math.round(milliseconds / 86400000)} dia(s)`;
+  if (item.allDay) { const days = Math.round(milliseconds / 86400000); return `${days} ${days === 1 ? "dia" : "dias"}`; }
   const hours = milliseconds / 3600000;
-  return hours < 24 ? `${hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h` : `${Math.floor(hours / 24)} d ${Math.round(hours % 24)} h`;
+  if (hours < 24) return `${hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h`;
+  const days = Math.floor(hours / 24);
+  const remaining = Math.round(hours % 24);
+  return remaining ? `${days} d ${remaining} h` : `${days} ${days === 1 ? "dia" : "dias"}`;
 }
 
-function temporalStatus(item: UnavailabilityListItem) {
-  const now = Date.now();
-  if (new Date(item.endsAt).getTime() <= now) return "Encerrada";
-  if (new Date(item.startsAt).getTime() <= now) return "Em andamento";
-  return "Futura";
+function temporal(item: CentralUnavailabilityListItem, referenceTime: string) {
+  const now = new Date(referenceTime).getTime();
+  if (new Date(item.endsAt).getTime() <= now) return { label: "Encerrada", tone: "neutral" as const };
+  if (new Date(item.startsAt).getTime() <= now) return { label: "Atual", tone: "warning" as const };
+  return { label: "Futura", tone: "info" as const };
 }
 
-function canEdit(item: UnavailabilityListItem, role: "admin" | "coordinator") {
-  return role === "admin" || new Date(item.endsAt).getTime() > Date.now();
+function canEdit(item: CentralUnavailabilityListItem, role: "admin" | "coordinator", referenceTime: string) {
+  return role === "admin" || new Date(item.endsAt).getTime() > new Date(referenceTime).getTime();
 }
 
-export function UnavailabilityList({
-  organizationSlug,
-  resource,
-  items,
-  timezone,
-  role,
-  hasFilters,
-}: {
-  organizationSlug: string;
-  resource: UnavailabilityResourceKind;
-  items: UnavailabilityListItem[];
-  timezone: string;
-  role: "admin" | "coordinator";
-  hasFilters: boolean;
-}) {
-  const segment = resource === "technicians" ? "tecnicos" : "veiculos";
-  const base = `/app/${organizationSlug}/planejamento/indisponibilidades`;
-  if (items.length === 0) return <div className="rounded-xl border border-dashed border-zinc-300 bg-white p-10 text-center"><h2 className="font-semibold">{hasFilters ? "Nenhuma indisponibilidade encontrada" : "Nenhuma indisponibilidade cadastrada"}</h2><p className="mt-2 text-sm text-zinc-600">{hasFilters ? "Altere ou limpe os filtros." : "Cadastre o primeiro período para este recurso."}</p>{!hasFilters ? <Link href={`${base}/${segment}/nova`} className="mt-4 inline-flex h-10 items-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white">Nova indisponibilidade</Link> : null}</div>;
-  return (
-    <>
-      <div className="hidden overflow-x-auto rounded-xl border border-zinc-200 bg-white lg:block"><table className="w-full min-w-[1050px] text-left"><thead className="bg-zinc-50 text-xs uppercase text-zinc-600"><tr><th className="px-4 py-3">{resource === "technicians" ? "Técnico" : "Veículo"}</th><th className="px-4 py-3">Tipo</th><th className="px-4 py-3">Período</th><th className="px-4 py-3">Duração</th><th className="px-4 py-3">Motivo</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Ações</th></tr></thead><tbody className="divide-y">{items.map((item) => <tr key={item.id}><td className="px-4 py-4"><p className="font-semibold">{item.resourceName}</p><p className="text-xs text-zinc-500">{item.resourceDescription}</p></td><td className="px-4 py-4 text-sm">{item.typeName}</td><td className="whitespace-nowrap px-4 py-4 text-sm">{formatPeriod(item, timezone)}</td><td className="px-4 py-4 text-sm">{duration(item)}</td><td className="max-w-xs px-4 py-4 text-sm text-zinc-600">{item.reason ?? "—"}</td><td className="px-4 py-4"><div className="space-y-1"><span className={item.active ? "rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800" : "rounded-full bg-zinc-200 px-2.5 py-1 text-xs font-semibold text-zinc-700"}>{item.active ? "Ativa" : "Inativa"}</span><p className="text-xs text-zinc-500">{temporalStatus(item)}</p></div></td><td className="px-4 py-4"><div className="space-y-2">{canEdit(item, role) ? <Link href={`${base}/${segment}/${item.id}/editar`} className="text-sm font-medium">Editar</Link> : null}<UnavailabilityStatusAction organizationSlug={organizationSlug} resource={resource} id={item.id} active={item.active} /></div></td></tr>)}</tbody></table></div>
-      <div className="space-y-3 lg:hidden">{items.map((item) => <article key={item.id} className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4"><div className="flex items-start justify-between gap-3"><div><h2 className="font-semibold">{item.resourceName}</h2><p className="text-xs text-zinc-500">{item.resourceDescription}</p></div><span className={item.active ? "rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800" : "rounded-full bg-zinc-200 px-2.5 py-1 text-xs font-semibold text-zinc-700"}>{item.active ? "Ativa" : "Inativa"}</span></div><dl className="grid gap-2 text-sm"><div><dt className="text-xs text-zinc-500">Tipo</dt><dd>{item.typeName}</dd></div><div><dt className="text-xs text-zinc-500">Período</dt><dd>{formatPeriod(item, timezone)}</dd></div><div><dt className="text-xs text-zinc-500">Motivo</dt><dd>{item.reason ?? "—"}</dd></div></dl><div className="flex flex-wrap gap-3 border-t pt-3">{canEdit(item, role) ? <Link href={`${base}/${segment}/${item.id}/editar`} className="text-sm font-medium">Editar</Link> : null}<UnavailabilityStatusAction organizationSlug={organizationSlug} resource={resource} id={item.id} active={item.active} /></div></article>)}</div>
-    </>
-  );
+function Resource({ item, organizationSlug }: { item: CentralUnavailabilityListItem; organizationSlug: string }) {
+  const isTechnician = item.resourceKind === "technicians";
+  const Icon = isTechnician ? UserRound : CarFront;
+  const href = `/app/${organizationSlug}/cadastros/${isTechnician ? "tecnicos" : "veiculos"}/${item.resourceId}`;
+  const title = isTechnician ? item.resourceName : item.resourceDescription ?? item.resourceName;
+  const description = isTechnician ? item.resourceDescription : item.resourceName;
+  return <div className="flex min-w-0 items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><Icon aria-hidden="true" className="size-4" /></span><div className="min-w-0"><Link href={href} className={`${isTechnician ? "" : "font-mono tracking-wide"} block truncate text-sm font-semibold text-foreground hover:underline`}>{title}</Link><p className="mt-0.5 truncate text-xs text-muted-foreground">{isTechnician ? "Técnico" : "Veículo"}{description ? ` • ${description}` : ""}</p></div></div>;
+}
+
+export function UnavailabilityList({ organizationSlug, items, timezone, role, hasFilters, referenceTime }: { organizationSlug: string; items: CentralUnavailabilityListItem[]; timezone: string; role: "admin" | "coordinator"; hasFilters: boolean; referenceTime: string }) {
+  if (items.length === 0) return hasFilters
+    ? <NoResultsState description="Revise os filtros ou limpe a pesquisa." action={{ href: `/app/${organizationSlug}/planejamento/indisponibilidades`, label: "Limpar filtros" }} />
+    : <EmptyState icon={CalendarClock} title="Nenhuma indisponibilidade cadastrada" description="Registre períodos em que técnicos ou veículos não poderão ser alocados." />;
+  return <>
+    <div className="hidden rounded-xl border border-border bg-card lg:block"><table className="w-full table-fixed text-left"><thead className="border-b border-border bg-muted/60 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><tr><th scope="col" className="w-[23%] px-4 py-3">Recurso</th><th scope="col" className="w-[15%] px-4 py-3">Tipo</th><th scope="col" className="w-[27%] px-4 py-3">Período</th><th scope="col" className="w-[15%] px-4 py-3">Motivo</th><th scope="col" className="w-[14%] px-4 py-3">Situação</th><th scope="col" className="w-16 px-4 py-3 text-right"><span className="sr-only">Ações</span></th></tr></thead><tbody className="divide-y divide-border">{items.map((item) => { const state = temporal(item, referenceTime); return <tr key={`${item.resourceKind}-${item.id}`} className="align-top hover:bg-muted/30"><td className="px-4 py-4"><Resource item={item} organizationSlug={organizationSlug} /></td><td className="px-4 py-4 text-sm font-medium">{item.typeName}</td><td className="px-4 py-4"><p className="text-sm leading-5">{formatPeriod(item, timezone)}</p><p className="mt-1 text-xs text-muted-foreground">{duration(item)} · fuso {timezone}</p></td><td className="px-4 py-4"><p title={item.reason ?? undefined} className="line-clamp-2 text-sm leading-5 text-muted-foreground">{item.reason ?? "Não informado"}</p></td><td className="px-4 py-4"><div className="flex flex-col items-start gap-2"><Badge tone={state.tone}>{state.label}</Badge><ActiveStatusBadge active={item.active} feminine /></div></td><td className="px-4 py-4 text-right"><UnavailabilityRowActions organizationSlug={organizationSlug} resource={item.resourceKind} unavailabilityId={item.id} resourceId={item.resourceId} resourceName={item.resourceName} active={item.active} canEdit={canEdit(item, role, referenceTime)} /></td></tr>; })}</tbody></table></div>
+    <div className="space-y-3 lg:hidden">{items.map((item) => { const state = temporal(item, referenceTime); return <article key={`${item.resourceKind}-${item.id}`} className="rounded-xl border border-border bg-card p-4"><div className="flex items-start justify-between gap-3"><Resource item={item} organizationSlug={organizationSlug} /><div className="flex shrink-0 items-start gap-1"><Badge tone={state.tone}>{state.label}</Badge><UnavailabilityRowActions organizationSlug={organizationSlug} resource={item.resourceKind} unavailabilityId={item.id} resourceId={item.resourceId} resourceName={item.resourceName} active={item.active} canEdit={canEdit(item, role, referenceTime)} /></div></div><div className="mt-4 space-y-2"><div><p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{item.typeName}</p><p className="mt-1 text-sm leading-5">{formatPeriod(item, timezone)}</p><p className="mt-1 text-xs text-muted-foreground">{duration(item)}</p></div>{item.reason ? <p className="line-clamp-2 text-sm leading-5 text-muted-foreground">{item.reason}</p> : null}</div><div className="mt-4 border-t border-border pt-3"><ActiveStatusBadge active={item.active} feminine /></div></article>; })}</div>
+  </>;
 }

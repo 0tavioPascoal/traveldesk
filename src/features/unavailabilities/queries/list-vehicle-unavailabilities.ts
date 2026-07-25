@@ -12,18 +12,22 @@ function quote(value: string) {
 export async function listVehicleUnavailabilities(
   organizationSlug: string,
   filters: UnavailabilityFilters,
+  referenceTime: string,
 ): Promise<UnavailabilityListItem[]> {
   const context = await requireOrganizationRole(organizationSlug, ["admin", "coordinator"] as const);
   const supabase = await createClient();
   let matchingIds: string[] = [];
+  let matchingTypeIds: string[] = [];
   if (filters.query) {
     const pattern = `%${filters.query.replace(/[\\%_]/g, "\\$&")}%`;
     const normalizedPlate = filters.query.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-    const result = await supabase.from("vehicles").select("id")
-      .eq("organization_id", context.organization.id)
-      .or(`brand.ilike.${quote(pattern)},model.ilike.${quote(pattern)},plate.ilike.${quote(`%${normalizedPlate}%`)}`);
-    if (result.error) throw new Error("Não foi possível pesquisar os veículos.");
-    matchingIds = result.data.map((item) => item.id);
+    const [resourceResult, typeResult] = await Promise.all([
+      supabase.from("vehicles").select("id").eq("organization_id", context.organization.id).or(`brand.ilike.${quote(pattern)},model.ilike.${quote(pattern)},plate.ilike.${quote(`%${normalizedPlate}%`)}`),
+      supabase.from("vehicle_unavailability_types").select("id").eq("organization_id", context.organization.id).ilike("name", pattern),
+    ]);
+    if (resourceResult.error || typeResult.error) throw new Error("Não foi possível pesquisar as indisponibilidades dos veículos.");
+    matchingIds = resourceResult.data.map((item) => item.id);
+    matchingTypeIds = typeResult.data.map((item) => item.id);
   }
 
   let query = supabase.from("vehicle_unavailabilities").select(
@@ -32,6 +36,9 @@ export async function listVehicleUnavailabilities(
   if (filters.resourceId) query = query.eq("vehicle_id", filters.resourceId);
   if (filters.unavailabilityTypeId) query = query.eq("unavailability_type_id", filters.unavailabilityTypeId);
   if (filters.status !== "all") query = query.eq("active", filters.status === "active");
+  if (filters.temporalStatus === "current") query = query.lte("starts_at", referenceTime).gt("ends_at", referenceTime);
+  if (filters.temporalStatus === "future") query = query.gt("starts_at", referenceTime);
+  if (filters.temporalStatus === "past") query = query.lte("ends_at", referenceTime);
   const period = normalizeUnavailabilityFilterPeriod(filters.startsOn, filters.endsOn, context.organization.timezone);
   if (period.startsAt) query = query.gt("ends_at", period.startsAt);
   if (period.endsAt) query = query.lt("starts_at", period.endsAt);
@@ -39,6 +46,7 @@ export async function listVehicleUnavailabilities(
     const pattern = `%${filters.query.replace(/[\\%_]/g, "\\$&")}%`;
     const clauses = [`reason.ilike.${quote(pattern)}`];
     if (matchingIds.length > 0) clauses.push(`vehicle_id.in.(${matchingIds.join(",")})`);
+    if (matchingTypeIds.length > 0) clauses.push(`unavailability_type_id.in.(${matchingTypeIds.join(",")})`);
     query = query.or(clauses.join(","));
   }
   const { data, error } = await query;

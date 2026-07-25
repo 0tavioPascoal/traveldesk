@@ -18,4 +18,9 @@ export const vehicleFilterSchema = z.object({
     first,
     z.union([z.literal(""), z.string().trim().toUpperCase().regex(/^[A-Z]{2}$/)]).catch("").default(""),
   ),
+  minimumCapacity: z.preprocess(
+    first,
+    z.union([z.literal(""), z.coerce.number().int().min(1).max(99).transform(String)]).catch("").default(""),
+  ),
+  page: z.preprocess(first, z.coerce.number().int().min(1).max(10000).catch(1).default(1)),
 });

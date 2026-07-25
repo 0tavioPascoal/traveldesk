@@ -1,6 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
+import { ActiveStatusBadge } from "@/components/ui/active-status-badge";
 import { ClientUnitForm } from "@/features/clients/components/client-unit-form";
 import { getClientById } from "@/features/clients/queries/get-client-by-id";
 import { getClientUnitById } from "@/features/clients/queries/get-client-unit-by-id";
@@ -14,6 +16,9 @@ export default async function EditClientUnitPage({ params }: EditClientUnitPageP
   const detailPath = `/app/${organizationSlug}/cadastros/clientes/${client.id}`;
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8"><div className="mx-auto max-w-4xl"><header className="mb-6"><Link href={detailPath} className="text-sm font-medium text-zinc-600 hover:text-zinc-950">← Voltar para o cliente</Link><h1 className="mt-5 text-2xl font-bold text-zinc-950">Editar unidade</h1><p className="mt-2 text-sm text-zinc-600">Atualize os dados de {unit.name}.</p></header><section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"><ClientUnitForm organizationSlug={organizationSlug} clientId={client.id} clientName={client.legal_name} unitId={unit.id} initialValues={{ name: unit.name, taxId: unit.tax_id ?? "", addressLine: unit.address_line ?? "", addressNumber: unit.address_number ?? "", addressComplement: unit.address_complement ?? "", district: unit.district ?? "", city: unit.city, state: unit.state, postalCode: unit.postal_code ?? "", contactName: unit.contact_name ?? "", contactEmail: unit.contact_email ?? "", contactPhone: unit.contact_phone ?? "", accessInstructions: unit.access_instructions ?? "", notes: unit.notes ?? "" }} /></section></div></main>
+    <PageContainer className="max-w-5xl space-y-6">
+      <PageHeader title="Editar unidade" description="Atualize identificação, endereço e contato sem alterar o vínculo com o cliente." eyebrow={`${client.legal_name} • ${unit.name}`} breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Clientes", href: `/app/${organizationSlug}/cadastros/clientes` }, { label: client.legal_name, href: `${detailPath}#unidades` }, { label: unit.name }, { label: "Editar" }]} actions={<ActiveStatusBadge active={unit.active} feminine />} />
+      <ClientUnitForm organizationSlug={organizationSlug} clientId={client.id} clientName={client.legal_name} unitId={unit.id} initialValues={{ name: unit.name, taxId: unit.tax_id ?? "", addressLine: unit.address_line ?? "", addressNumber: unit.address_number ?? "", addressComplement: unit.address_complement ?? "", district: unit.district ?? "", city: unit.city, state: unit.state, postalCode: unit.postal_code ?? "", contactName: unit.contact_name ?? "", contactEmail: unit.contact_email ?? "", contactPhone: unit.contact_phone ?? "", accessInstructions: unit.access_instructions ?? "", notes: unit.notes ?? "" }} />
+    </PageContainer>
   );
 }

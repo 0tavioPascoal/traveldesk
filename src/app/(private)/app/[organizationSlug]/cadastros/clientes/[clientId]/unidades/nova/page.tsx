@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
 import { ClientUnitForm } from "@/features/clients/components/client-unit-form";
 import { getClientById } from "@/features/clients/queries/get-client-by-id";
 
@@ -14,6 +15,9 @@ export default async function NewClientUnitPage({ params }: NewClientUnitPagePro
   const emptyValues = { name: "", taxId: "", addressLine: "", addressNumber: "", addressComplement: "", district: "", city: "", state: "", postalCode: "", contactName: "", contactEmail: "", contactPhone: "", accessInstructions: "", notes: "" };
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8"><div className="mx-auto max-w-4xl"><header className="mb-6"><Link href={detailPath} className="text-sm font-medium text-zinc-600 hover:text-zinc-950">← Voltar para o cliente</Link><h1 className="mt-5 text-2xl font-bold text-zinc-950">Nova unidade</h1><p className="mt-2 text-sm text-zinc-600">Cadastre uma unidade de {client.legal_name}.</p></header><section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"><ClientUnitForm organizationSlug={organizationSlug} clientId={client.id} clientName={client.legal_name} initialValues={emptyValues} /></section></div></main>
+    <PageContainer className="max-w-5xl space-y-6">
+      <PageHeader title="Nova unidade" description="Cadastre o local de atendimento, endereço e contato principal da unidade." eyebrow={client.legal_name} breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Clientes", href: `/app/${organizationSlug}/cadastros/clientes` }, { label: client.legal_name, href: `${detailPath}#unidades` }, { label: "Nova unidade" }]} />
+      <ClientUnitForm organizationSlug={organizationSlug} clientId={client.id} clientName={client.legal_name} initialValues={emptyValues} />
+    </PageContainer>
   );
 }

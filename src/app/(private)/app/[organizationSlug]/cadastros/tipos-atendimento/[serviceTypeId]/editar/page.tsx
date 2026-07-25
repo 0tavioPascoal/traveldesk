@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
 import { ServiceTypeForm } from "@/features/service-types/components/service-type-form";
 import { getServiceTypeById } from "@/features/service-types/queries/get-service-type-by-id";
 
@@ -24,23 +25,9 @@ export default async function EditServiceTypePage({
   const listPath = `/app/${organizationSlug}/cadastros/tipos-atendimento`;
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-6">
-          <Link
-            href={listPath}
-            className="text-sm font-medium text-zinc-600 hover:text-zinc-950"
-          >
-            ← Voltar para tipos de atendimento
-          </Link>
-          <h1 className="mt-5 text-2xl font-bold text-zinc-950">
-            Editar tipo de atendimento
-          </h1>
-          <p className="mt-2 text-sm text-zinc-600">
-            Atualize os dados e a disponibilidade deste cadastro.
-          </p>
-        </header>
-        <section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <PageContainer className="max-w-3xl space-y-6">
+        <PageHeader title="Editar tipo de atendimento" description="Atualize a categoria e sua disponibilidade para novos atendimentos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Tipos de atendimento", href: listPath }, { label: "Editar" }]} />
+        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
           <ServiceTypeForm
             organizationSlug={organizationSlug}
             serviceTypeId={serviceType.id}
@@ -51,7 +38,6 @@ export default async function EditServiceTypePage({
             }}
           />
         </section>
-      </div>
-    </main>
+    </PageContainer>
   );
 }

@@ -1,160 +1,37 @@
 import Link from "next/link";
 
+import { ActiveStatusBadge } from "@/components/ui/active-status-badge";
+import { buttonStyles } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { NoResultsState } from "@/components/ui/no-results-state";
 import { ServiceTypeStatusAction } from "@/features/service-types/components/service-type-status-action";
 import type { ServiceType } from "@/features/service-types/types/service-type";
 
-type ServiceTypeListProps = {
-  organizationSlug: string;
-  serviceTypes: ServiceType[];
-  timezone: string;
-  hasFilters: boolean;
-};
+type ServiceTypeListProps = { organizationSlug: string; serviceTypes: ServiceType[]; timezone: string; hasFilters: boolean };
 
 function formatUpdatedAt(value: string, timezone: string) {
-  const options: Intl.DateTimeFormatOptions = {
-    dateStyle: "short",
-    timeStyle: "short",
-    timeZone: timezone,
-  };
-
   try {
-    return new Intl.DateTimeFormat("pt-BR", options).format(new Date(value));
+    return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short", timeZone: timezone }).format(new Date(value));
   } catch {
-    return new Intl.DateTimeFormat("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short",
-    }).format(new Date(value));
+    return new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
   }
 }
 
-function StatusBadge({ active }: { active: boolean }) {
-  return (
-    <span
-      className={
-        active
-          ? "inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800"
-          : "inline-flex rounded-full bg-zinc-200 px-2.5 py-1 text-xs font-semibold text-zinc-700"
-      }
-    >
-      {active ? "Ativo" : "Inativo"}
-    </span>
-  );
-}
-
-export function ServiceTypeList({
-  organizationSlug,
-  serviceTypes,
-  timezone,
-  hasFilters,
-}: ServiceTypeListProps) {
-  const newPath = `/app/${organizationSlug}/cadastros/tipos-atendimento/novo`;
-
+export function ServiceTypeList({ organizationSlug, serviceTypes, timezone, hasFilters }: ServiceTypeListProps) {
+  const base = `/app/${organizationSlug}/cadastros/tipos-atendimento`;
   if (serviceTypes.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center">
-        <h2 className="text-base font-semibold text-zinc-950">
-          {hasFilters
-            ? "Nenhum tipo de atendimento encontrado"
-            : "Nenhum tipo de atendimento cadastrado"}
-        </h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-zinc-600">
-          {hasFilters
-            ? "Altere ou limpe os filtros para visualizar outros registros."
-            : "Cadastre o primeiro tipo de atendimento desta organização."}
-        </p>
-        {!hasFilters ? (
-          <Link
-            href={newPath}
-            className="mt-5 inline-flex h-10 items-center justify-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800"
-          >
-            Novo tipo de atendimento
-          </Link>
-        ) : null}
-      </div>
-    );
+    return hasFilters ? <NoResultsState description="Revise a pesquisa ou limpe os filtros." action={{ href: base, label: "Limpar filtros" }} /> : <EmptyState title="Nenhum tipo de atendimento cadastrado" description="Cadastre as categorias utilizadas para classificar os atendimentos técnicos." action={{ href: `${base}/novo`, label: "Novo tipo de atendimento" }} />;
   }
 
   return (
     <>
-      <div className="hidden overflow-x-auto rounded-xl border border-zinc-200 md:block">
-        <table className="w-full min-w-[760px] border-collapse text-left text-sm">
-          <thead className="bg-zinc-50 text-xs uppercase tracking-wide text-zinc-600">
-            <tr>
-              <th className="px-4 py-3 font-semibold">Nome</th>
-              <th className="px-4 py-3 font-semibold">Descrição</th>
-              <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 font-semibold">Atualizado em</th>
-              <th className="px-4 py-3 font-semibold">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-200 bg-white">
-            {serviceTypes.map((serviceType) => (
-              <tr key={serviceType.id}>
-                <td className="px-4 py-4 font-medium text-zinc-950">
-                  {serviceType.name}
-                </td>
-                <td className="max-w-xs px-4 py-4 text-zinc-600">
-                  {serviceType.description ?? "—"}
-                </td>
-                <td className="px-4 py-4">
-                  <StatusBadge active={serviceType.active} />
-                </td>
-                <td className="whitespace-nowrap px-4 py-4 text-zinc-600">
-                  {formatUpdatedAt(serviceType.updated_at, timezone)}
-                </td>
-                <td className="px-4 py-4">
-                  <div className="flex items-start gap-4">
-                    <Link
-                      href={`/app/${organizationSlug}/cadastros/tipos-atendimento/${serviceType.id}/editar`}
-                      className="text-sm font-medium text-zinc-800 hover:text-zinc-950"
-                    >
-                      Editar
-                    </Link>
-                    <ServiceTypeStatusAction
-                      organizationSlug={organizationSlug}
-                      serviceTypeId={serviceType.id}
-                      active={serviceType.active}
-                    />
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
+      <div className="hidden overflow-hidden rounded-2xl border border-border bg-card lg:block">
+        <table className="w-full table-fixed border-collapse text-left text-sm">
+          <thead className="border-b border-border bg-muted/70 text-xs uppercase tracking-wide text-muted-foreground"><tr><th scope="col" className="w-1/4 px-4 py-3 font-semibold">Tipo de atendimento</th><th scope="col" className="px-4 py-3 font-semibold">Descrição</th><th scope="col" className="w-28 px-4 py-3 font-semibold">Situação</th><th scope="col" className="w-40 px-4 py-3 font-semibold">Atualização</th><th scope="col" className="w-44 px-4 py-3 text-right font-semibold">Ações</th></tr></thead>
+          <tbody className="divide-y divide-border">{serviceTypes.map((item) => <tr key={item.id} className="transition-colors hover:bg-muted/40"><td className="px-4 py-3 font-semibold text-card-foreground">{item.name}</td><td className="px-4 py-3 text-muted-foreground"><p className="line-clamp-2" title={item.description ?? undefined}>{item.description ?? "Sem descrição"}</p></td><td className="px-4 py-3"><ActiveStatusBadge active={item.active} /></td><td className="whitespace-nowrap px-4 py-3 text-muted-foreground">{formatUpdatedAt(item.updated_at, timezone)}</td><td className="px-4 py-3"><div className="flex items-center justify-end gap-4"><Link href={`${base}/${item.id}/editar`} className="text-sm font-semibold text-primary hover:underline">Editar</Link><ServiceTypeStatusAction organizationSlug={organizationSlug} serviceTypeId={item.id} active={item.active} /></div></td></tr>)}</tbody>
         </table>
       </div>
-
-      <div className="space-y-3 md:hidden">
-        {serviceTypes.map((serviceType) => (
-          <article
-            key={serviceType.id}
-            className="rounded-xl border border-zinc-200 bg-white p-4"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <h2 className="font-semibold text-zinc-950">{serviceType.name}</h2>
-              <StatusBadge active={serviceType.active} />
-            </div>
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
-              {serviceType.description ?? "Sem descrição."}
-            </p>
-            <p className="mt-3 text-xs text-zinc-500">
-              Atualizado em {formatUpdatedAt(serviceType.updated_at, timezone)}
-            </p>
-            <div className="mt-4 flex items-start gap-4 border-t border-zinc-100 pt-3">
-              <Link
-                href={`/app/${organizationSlug}/cadastros/tipos-atendimento/${serviceType.id}/editar`}
-                className="text-sm font-medium text-zinc-800"
-              >
-                Editar
-              </Link>
-              <ServiceTypeStatusAction
-                organizationSlug={organizationSlug}
-                serviceTypeId={serviceType.id}
-                active={serviceType.active}
-              />
-            </div>
-          </article>
-        ))}
-      </div>
+      <div className="space-y-3 lg:hidden">{serviceTypes.map((item) => <article key={item.id} className="rounded-2xl border border-border bg-card p-4"><div className="flex items-start justify-between gap-3"><h2 className="min-w-0 break-words font-semibold text-card-foreground">{item.name}</h2><ActiveStatusBadge active={item.active} /></div><p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground" title={item.description ?? undefined}>{item.description ?? "Sem descrição"}</p><p className="mt-3 text-xs text-subtle-foreground">Atualizado em {formatUpdatedAt(item.updated_at, timezone)}</p><div className="mt-4 flex items-center justify-end gap-4 border-t border-border pt-3"><Link href={`${base}/${item.id}/editar`} className={buttonStyles({ variant: "ghost", size: "sm" })}>Editar</Link><ServiceTypeStatusAction organizationSlug={organizationSlug} serviceTypeId={item.id} active={item.active} /></div></article>)}</div>
     </>
   );
 }

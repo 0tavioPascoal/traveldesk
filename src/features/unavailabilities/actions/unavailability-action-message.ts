@@ -13,6 +13,8 @@ export function unavailabilityErrorMessage(
     past_edit_forbidden: "Somente administradores podem corrigir uma indisponibilidade encerrada.",
     not_found: "A indisponibilidade não foi encontrada.",
     invalid_period: "O período informado é inválido para o timezone da organização.",
+    trip_conflict: "O técnico já está alocado em uma viagem planejada nesse período.",
+    vehicle_trip_conflict: "O veículo já está reservado em uma viagem planejada nesse período.",
     unexpected: "Não foi possível concluir a operação. Tente novamente.",
   } as const;
   return messages[reason];

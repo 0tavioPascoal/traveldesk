@@ -1,0 +1,6 @@
+import { PageContainer } from "@/components/page/page-container";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export default function TechniciansLoading() {
+  return <PageContainer><div aria-busy="true" aria-label="Carregando técnicos" className="space-y-6"><div className="space-y-3"><Skeleton className="h-4 w-48" /><Skeleton className="h-9 w-64" /><Skeleton className="h-4 w-[34rem] max-w-full" /></div><Skeleton className="h-36" /><div className="hidden overflow-hidden rounded-2xl border border-border lg:block"><Skeleton className="h-12 rounded-none" />{Array.from({ length: 5 }, (_, index) => <Skeleton key={index} className="h-20 rounded-none border-t border-border" />)}</div><div className="grid gap-3 lg:hidden">{Array.from({ length: 3 }, (_, index) => <Skeleton key={index} className="h-48" />)}</div></div></PageContainer>;
+}

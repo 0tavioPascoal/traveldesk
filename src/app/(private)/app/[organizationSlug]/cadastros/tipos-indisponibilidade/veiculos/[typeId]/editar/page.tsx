@@ -1,6 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { UnavailabilityTypeForm } from "@/features/unavailabilities/components/unavailability-type-form";
 import { getVehicleUnavailabilityTypeById } from "@/features/unavailabilities/queries/get-vehicle-unavailability-type-by-id";
@@ -13,5 +14,5 @@ export default async function EditVehicleUnavailabilityTypePage({ params }: { pa
   const item = await getVehicleUnavailabilityTypeById(organizationSlug, typeId);
   if (!item) notFound();
   const path = `/app/${organizationSlug}/cadastros/tipos-indisponibilidade/veiculos`;
-  return <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6"><div className="mx-auto max-w-3xl"><Link href={path} className="text-sm font-medium text-zinc-600">← Voltar aos tipos</Link><div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"><h1 className="text-2xl font-bold">Editar tipo para veículo</h1><div className="mt-6"><UnavailabilityTypeForm organizationSlug={organizationSlug} resource="vehicles" typeId={typeId} initialValues={{ name: item.name, description: item.description ?? "", active: item.active }} /></div></div></div></main>;
+  return <PageContainer className="max-w-3xl space-y-6"><PageHeader title="Editar tipo para veículo" description="Atualize o motivo e sua disponibilidade para novos períodos de veículos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Tipos para veículos", href: path }, { label: "Editar" }]} /><section className="rounded-2xl border border-border bg-card p-5 sm:p-6"><UnavailabilityTypeForm organizationSlug={organizationSlug} resource="vehicles" typeId={typeId} initialValues={{ name: item.name, description: item.description ?? "", active: item.active }} /></section></PageContainer>;
 }

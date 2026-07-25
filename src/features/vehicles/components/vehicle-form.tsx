@@ -1,79 +1,42 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
+import { SectionHeader } from "@/components/page/section-header";
+import { buttonStyles } from "@/components/ui/button";
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { createVehicleAction } from "@/features/vehicles/actions/create-vehicle-action";
 import { updateVehicleAction } from "@/features/vehicles/actions/update-vehicle-action";
 import type { VehicleActionState, VehicleFormValues } from "@/features/vehicles/types/vehicle";
 
-type Props = {
-  organizationSlug: string;
-  initialValues: VehicleFormValues;
-  role: "admin" | "coordinator";
-  currentMileage: number | null;
-  vehicleId?: string;
-};
-
-const inputClass = "h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-950 outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10 disabled:bg-zinc-100 sm:text-sm";
+type Props = { organizationSlug: string; initialValues: VehicleFormValues; role: "admin" | "coordinator"; currentMileage: number | null; vehicleId?: string };
+const control = "h-11 w-full rounded-lg border border-input bg-card px-3 text-base text-card-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:bg-muted disabled:text-muted-foreground sm:text-sm";
 const states = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+const maximumYear = new Date().getFullYear() + 1;
 
 function maskPlate(value: string) {
   const normalized = value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 7);
-  return /^[A-Z]{3}\d{1,4}$/.test(normalized) && normalized.length > 3
-    ? `${normalized.slice(0, 3)}-${normalized.slice(3)}`
-    : normalized;
+  return /^[A-Z]{3}\d{1,4}$/.test(normalized) && normalized.length > 3 ? `${normalized.slice(0, 3)}-${normalized.slice(3)}` : normalized;
 }
 
 export function VehicleForm({ organizationSlug, initialValues, role, currentMileage, vehicleId }: Props) {
-  const action = vehicleId
-    ? updateVehicleAction.bind(null, organizationSlug, vehicleId)
-    : createVehicleAction.bind(null, organizationSlug);
-  const [state, formAction, pending] = useActionState(action, {
-    status: "idle", fieldErrors: {}, message: null, values: initialValues,
-  } satisfies VehicleActionState);
-  const cancelPath = vehicleId
-    ? `/app/${organizationSlug}/cadastros/veiculos/${vehicleId}`
-    : `/app/${organizationSlug}/cadastros/veiculos`;
-  const field = (name: keyof VehicleFormValues, label: string, attributes: React.InputHTMLAttributes<HTMLInputElement> = {}) => (
-    <div className="space-y-2">
-      <label htmlFor={name} className="block text-sm font-medium text-zinc-800">{label}</label>
-      <input id={name} name={name} disabled={pending} defaultValue={String(state.values[name] ?? "")} aria-invalid={state.fieldErrors[name] ? true : undefined} className={inputClass} {...attributes} />
-      {state.fieldErrors[name]?.[0] ? <p role="alert" className="text-sm text-red-700">{state.fieldErrors[name][0]}</p> : null}
-    </div>
-  );
-
+  const action = vehicleId ? updateVehicleAction.bind(null, organizationSlug, vehicleId) : createVehicleAction.bind(null, organizationSlug);
+  const [state, formAction, pending] = useActionState(action, { status: "idle", fieldErrors: {}, message: null, values: initialValues } satisfies VehicleActionState);
+  const [notesLength, setNotesLength] = useState(state.values.notes.length);
+  const cancelPath = vehicleId ? `/app/${organizationSlug}/cadastros/veiculos/${vehicleId}` : `/app/${organizationSlug}/cadastros/veiculos`;
+  const field = (name: keyof VehicleFormValues, label: string, attributes: React.InputHTMLAttributes<HTMLInputElement> = {}) => { const error = state.fieldErrors[name]?.[0]; const errorId = `${name}-error`; return <div className="space-y-1.5"><label htmlFor={name} className="block text-sm font-medium">{label}</label><input id={name} name={name} disabled={pending} defaultValue={String(state.values[name] ?? "")} aria-invalid={error ? true : undefined} aria-describedby={error ? errorId : undefined} className={control} {...attributes} />{error ? <p id={errorId} role="alert" className="text-sm text-destructive">{error}</p> : null}</div>; };
   return <form action={formAction} noValidate className="space-y-6">
-    <fieldset className="grid gap-5 rounded-xl border border-zinc-200 p-4 sm:grid-cols-2 lg:grid-cols-4">
-      <legend className="px-1 font-semibold text-zinc-950">Identificação</legend>
-      <div className="space-y-2"><label htmlFor="plate" className="block text-sm font-medium text-zinc-800">Placa</label><input id="plate" name="plate" required maxLength={8} autoFocus disabled={pending} defaultValue={maskPlate(state.values.plate)} onInput={(event) => { event.currentTarget.value = maskPlate(event.currentTarget.value); }} placeholder="ABC-1234" aria-invalid={state.fieldErrors.plate ? true : undefined} className={inputClass} />{state.fieldErrors.plate?.[0] ? <p role="alert" className="text-sm text-red-700">{state.fieldErrors.plate[0]}</p> : null}</div>
-      <div className="lg:col-span-2">{field("brand", "Marca", { required: true, maxLength: 80 })}</div>
-      <div className="lg:col-span-2">{field("model", "Modelo", { required: true, maxLength: 120 })}</div>
-      {field("manufactureYear", "Ano de fabricação", { type: "number", min: 1900, max: new Date().getFullYear() + 1 })}
-      {field("modelYear", "Ano do modelo", { type: "number", min: 1900, max: new Date().getFullYear() + 1 })}
-    </fieldset>
+    <section aria-labelledby="vehicle-identification-title" className="rounded-2xl border border-border bg-card p-5 sm:p-6"><SectionHeader id="vehicle-identification-title" title="Identificação" description="Placa, marca, modelo e anos de fabricação do veículo." /><div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"><div className="space-y-1.5"><label htmlFor="plate" className="block text-sm font-medium">Placa</label><input id="plate" name="plate" required maxLength={8} autoFocus disabled={pending} defaultValue={maskPlate(state.values.plate)} onInput={(event) => { event.currentTarget.value = maskPlate(event.currentTarget.value); }} placeholder="ABC-1234" aria-invalid={state.fieldErrors.plate?.[0] ? true : undefined} aria-describedby={state.fieldErrors.plate?.[0] ? "plate-error" : "plate-help"} className={`${control} font-mono uppercase`} />{state.fieldErrors.plate?.[0] ? <p id="plate-error" role="alert" className="text-sm text-destructive">{state.fieldErrors.plate[0]}</p> : <p id="plate-help" className="text-xs text-muted-foreground">Aceita placas antigas e Mercosul.</p>}</div><div className="lg:col-span-3">{field("brand", "Marca", { required: true, maxLength: 80 })}</div><div className="sm:col-span-2">{field("model", "Modelo", { required: true, maxLength: 120 })}</div>{field("manufactureYear", "Ano de fabricação", { type: "number", min: 1900, max: maximumYear })}{field("modelYear", "Ano do modelo", { type: "number", min: 1900, max: maximumYear })}</div></section>
 
-    <fieldset className="grid gap-5 rounded-xl border border-zinc-200 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_10rem]">
-      <legend className="px-1 font-semibold text-zinc-950">Capacidade e base</legend>
-      <div>{field("passengerCapacity", "Capacidade total", { type: "number", required: true, min: 1, max: 99 })}<p className="mt-1 text-xs text-zinc-500">Inclui o motorista.</p></div>
-      {field("baseCity", "Cidade-base", { required: true, maxLength: 120 })}
-      <div className="space-y-2"><label htmlFor="baseState" className="block text-sm font-medium text-zinc-800">Estado-base</label><select id="baseState" name="baseState" required disabled={pending} defaultValue={state.values.baseState} className={inputClass}><option value="">UF</option>{states.map((stateCode) => <option key={stateCode}>{stateCode}</option>)}</select>{state.fieldErrors.baseState?.[0] ? <p role="alert" className="text-sm text-red-700">{state.fieldErrors.baseState[0]}</p> : null}</div>
-    </fieldset>
+    <section aria-labelledby="vehicle-capacity-title" className="rounded-2xl border border-border bg-card p-5 sm:p-6"><SectionHeader id="vehicle-capacity-title" title="Capacidade e base" description="Lotação total e localidade operacional de referência." /><div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-[1fr_1.5fr_10rem]"><div>{field("passengerCapacity", "Capacidade total", { type: "number", required: true, min: 1, max: 99, step: 1 })}<p className="mt-1 text-xs text-muted-foreground">Informe a capacidade total, incluindo o motorista.</p></div>{field("baseCity", "Cidade-base", { required: true, maxLength: 120 })}<div className="space-y-1.5"><label htmlFor="baseState" className="block text-sm font-medium">Estado-base</label><select id="baseState" name="baseState" required disabled={pending} defaultValue={state.values.baseState} aria-invalid={state.fieldErrors.baseState?.[0] ? true : undefined} aria-describedby={state.fieldErrors.baseState?.[0] ? "baseState-error" : undefined} className={control}><option value="">UF</option>{states.map((stateCode) => <option key={stateCode}>{stateCode}</option>)}</select>{state.fieldErrors.baseState?.[0] ? <p id="baseState-error" role="alert" className="text-sm text-destructive">{state.fieldErrors.baseState[0]}</p> : null}</div></div></section>
 
-    <fieldset className="grid gap-5 rounded-xl border border-zinc-200 p-4 sm:grid-cols-2">
-      <legend className="px-1 font-semibold text-zinc-950">Controle operacional</legend>
-      <div>{field("currentMileage", "Quilometragem atual", { type: "number", min: role === "coordinator" && currentMileage !== null ? currentMileage : 0, step: 1 })}<p className="mt-1 text-xs text-zinc-500">{role === "admin" ? "Reduções são tratadas como correção administrativa." : "A quilometragem registrada não pode ser reduzida."}</p></div>
-      <div className="space-y-2"><label htmlFor="operationalStatus" className="block text-sm font-medium text-zinc-800">Condição operacional</label><select id="operationalStatus" name="operationalStatus" disabled={pending} defaultValue={state.values.operationalStatus} className={inputClass}><option value="available">Disponível</option><option value="maintenance">Em manutenção</option><option value="blocked">Bloqueado</option></select>{state.fieldErrors.operationalStatus?.[0] ? <p role="alert" className="text-sm text-red-700">{state.fieldErrors.operationalStatus[0]}</p> : null}</div>
-    </fieldset>
+    <section aria-labelledby="vehicle-operation-title" className="rounded-2xl border border-border bg-card p-5 sm:p-6"><SectionHeader id="vehicle-operation-title" title="Controle operacional" description="Quilometragem atual e condição usada na elegibilidade para viagens." /><div className="mt-6 grid gap-5 sm:grid-cols-2"><div>{field("currentMileage", "Quilometragem atual", { type: "number", min: role === "coordinator" && currentMileage !== null ? currentMileage : 0, step: 1 })}<p className="mt-1 text-xs text-muted-foreground">{role === "admin" ? "Reduções são tratadas como correção administrativa." : "A quilometragem registrada não pode ser reduzida."}</p></div><div className="space-y-1.5"><label htmlFor="operationalStatus" className="block text-sm font-medium">Condição operacional</label><select id="operationalStatus" name="operationalStatus" disabled={pending} defaultValue={state.values.operationalStatus} aria-invalid={state.fieldErrors.operationalStatus?.[0] ? true : undefined} aria-describedby="operationalStatus-help" className={control}><option value="available">Disponível</option><option value="maintenance">Em manutenção</option><option value="blocked">Bloqueado</option></select><p id="operationalStatus-help" className="text-xs leading-5 text-muted-foreground">A condição operacional é independente da ativação do cadastro.</p>{state.fieldErrors.operationalStatus?.[0] ? <p role="alert" className="text-sm text-destructive">{state.fieldErrors.operationalStatus[0]}</p> : null}</div></div></section>
 
-    <fieldset className="grid gap-5 rounded-xl border border-zinc-200 p-4 sm:grid-cols-2">
-      <legend className="px-1 font-semibold text-zinc-950">Documentação e manutenção</legend>
-      {field("licensingExpiresAt", "Validade do licenciamento", { type: "date" })}
-      {field("maintenanceDueAt", "Próxima manutenção", { type: "date" })}
-    </fieldset>
+    <section aria-labelledby="vehicle-document-title" className="rounded-2xl border border-border bg-card p-5 sm:p-6"><SectionHeader id="vehicle-document-title" title="Documentação e manutenção" description="Datas de referência para acompanhamento da frota." /><div className="mt-6 grid gap-5 sm:grid-cols-2">{field("licensingExpiresAt", "Validade do licenciamento", { type: "date" })}{field("maintenanceDueAt", "Próxima manutenção", { type: "date" })}</div><p className="mt-4 text-xs text-muted-foreground">Essas datas geram avisos visuais e não substituem as regras de disponibilidade do servidor.</p></section>
 
-    <div className="space-y-2"><label htmlFor="notes" className="block text-sm font-medium text-zinc-800">Observações</label><textarea id="notes" name="notes" rows={5} maxLength={2000} disabled={pending} defaultValue={state.values.notes} className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10" />{state.fieldErrors.notes?.[0] ? <p role="alert" className="text-sm text-red-700">{state.fieldErrors.notes[0]}</p> : null}</div>
-    {state.message ? <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{state.message}</p> : null}
-    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><Link href={cancelPath} className="inline-flex h-11 items-center justify-center rounded-lg border border-zinc-300 px-4 text-sm font-semibold text-zinc-800">Cancelar</Link><button type="submit" disabled={pending} className="h-11 rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white disabled:opacity-60">{pending ? "Salvando..." : "Salvar veículo"}</button></div>
+    <section aria-labelledby="vehicle-notes-title" className="rounded-2xl border border-border bg-card p-5 sm:p-6"><SectionHeader id="vehicle-notes-title" title="Observações" description="Informações adicionais relevantes para a operação do veículo." /><div className="mt-6 space-y-1.5"><label htmlFor="notes" className="sr-only">Observações</label><textarea id="notes" name="notes" rows={5} maxLength={2000} disabled={pending} defaultValue={state.values.notes} onChange={(event) => setNotesLength(event.target.value.length)} aria-invalid={state.fieldErrors.notes?.[0] ? true : undefined} aria-describedby="vehicle-notes-help" className="w-full resize-y rounded-lg border border-input bg-card px-3 py-2 text-sm leading-6 outline-none focus:border-ring focus:ring-2 focus:ring-ring/20" /><div id="vehicle-notes-help" className="flex justify-between gap-4 text-xs text-muted-foreground"><span>As quebras de linha serão preservadas.</span><span>{notesLength}/2.000</span></div>{state.fieldErrors.notes?.[0] ? <p role="alert" className="text-sm text-destructive">{state.fieldErrors.notes[0]}</p> : null}</div></section>
+
+    {state.message ? <InlineAlert tone="error">{state.message}</InlineAlert> : null}<div className="sticky bottom-3 z-10 flex flex-col-reverse gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur sm:flex-row sm:justify-end"><Link href={cancelPath} className={buttonStyles({ variant: "secondary" })}>Cancelar</Link><button type="submit" disabled={pending} className={buttonStyles()}>{pending ? "Salvando..." : vehicleId ? "Salvar alterações" : "Criar veículo"}</button></div>
   </form>;
 }

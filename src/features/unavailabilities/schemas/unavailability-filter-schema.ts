@@ -16,17 +16,22 @@ const optionalDate = z.preprocess(
 export const unavailabilityFilterSchema = z.object({
   resource: z.preprocess(
     first,
-    z.enum(["technicians", "vehicles"]).catch("technicians").default("technicians"),
+    z.enum(["all", "technicians", "vehicles"]).catch("all").default("all"),
   ),
   query: z.preprocess(first, z.string().trim().max(160).catch("").default("")),
   startsOn: optionalDate,
   endsOn: optionalDate,
   resourceId: optionalUuid,
   unavailabilityTypeId: optionalUuid,
+  temporalStatus: z.preprocess(
+    first,
+    z.enum(["all", "current", "future", "past"]).catch("all").default("all"),
+  ),
   status: z.preprocess(
     first,
     z.enum(["all", "active", "inactive"]).catch("all").default("all"),
   ),
+  page: z.preprocess(first, z.coerce.number().int().positive().catch(1).default(1)),
 });
 
 export const unavailabilityTypeFilterSchema = z.object({

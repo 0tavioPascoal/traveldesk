@@ -1,8 +1,9 @@
 import "server-only";
 
 import { digitsOnly } from "@/features/technicians/schemas/technician-schema";
-import type { TechnicianFilters, TechnicianListItem } from "@/features/technicians/types/technician";
+import type { TechnicianFilters, TechnicianListResult } from "@/features/technicians/types/technician";
 import { listTechnicianSkills } from "@/features/technicians/queries/list-technician-skills";
+import { listTechnicianUpcomingUnavailabilities } from "@/features/unavailabilities/queries/list-technician-upcoming-unavailabilities";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,10 +20,11 @@ function escaped(value: string) {
 export async function listTechnicians(
   organizationSlug: string,
   filters: TechnicianFilters,
-): Promise<TechnicianListItem[]> {
+): Promise<TechnicianListResult> {
   const context = await requireOrganizationRole(organizationSlug, roles);
   const supabase = await createClient();
   let allowedIds: string[] | null = null;
+  const pageSize = 20;
 
   if (filters.skillId) {
     const { data, error } = await supabase
@@ -32,12 +34,12 @@ export async function listTechnicians(
       .eq("skill_id", filters.skillId);
     if (error) throw new Error("Não foi possível filtrar os técnicos.");
     allowedIds = data.map((item) => item.technician_id);
-    if (allowedIds.length === 0) return [];
+    if (allowedIds.length === 0) return { items: [], page: filters.page, pageSize, total: 0, totalPages: 0 };
   }
 
   let query = supabase
     .from("technicians")
-    .select("id, name, job_title, base_city, base_state, can_drive_company_vehicle, driver_license_expires_at, active, updated_at")
+    .select("id, name, document, email, job_title, base_city, base_state, can_drive_company_vehicle, driver_license_number, driver_license_category, driver_license_expires_at, active, updated_at", { count: "exact" })
     .eq("organization_id", context.organization.id)
     .order("name");
 
@@ -55,8 +57,32 @@ export async function listTechnicians(
     query = query.or(clauses.join(","));
   }
 
-  const { data, error } = await query;
+  const from = (filters.page - 1) * pageSize;
+  const { data, error, count } = await query.range(from, from + pageSize - 1);
   if (error) throw new Error("Não foi possível carregar os técnicos.");
-  const skills = await listTechnicianSkills(organizationSlug, data.map((item) => item.id));
-  return data.map((technician) => ({ ...technician, skills: skills.get(technician.id) ?? [] }));
+  const technicianIds = data.map((item) => item.id);
+  const [skills, unavailabilities] = await Promise.all([
+    listTechnicianSkills(organizationSlug, technicianIds),
+    listTechnicianUpcomingUnavailabilities(organizationSlug, technicianIds),
+  ]);
+  const now = Date.now();
+  const items = data.map((technician) => {
+    const upcoming = unavailabilities.get(technician.id) ?? [];
+    const current = upcoming.find((item) => new Date(item.startsAt).getTime() <= now);
+    const availabilityItem = current ?? upcoming[0];
+    return {
+      ...technician,
+      skills: skills.get(technician.id) ?? [],
+      availability: availabilityItem
+        ? {
+            kind: current ? "current" as const : "future" as const,
+            startsAt: availabilityItem.startsAt,
+            endsAt: availabilityItem.endsAt,
+            typeName: availabilityItem.typeName,
+          }
+        : null,
+    };
+  });
+  const total = count ?? 0;
+  return { items, page: filters.page, pageSize, total, totalPages: Math.ceil(total / pageSize) };
 }

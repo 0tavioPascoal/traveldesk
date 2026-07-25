@@ -1,9 +1,5 @@
-"use client";
-
-import { useActionState, useState } from "react";
-
+import { CatalogStatusDialog } from "@/components/catalog/catalog-status-dialog";
 import { changeSkillStatusAction } from "@/features/skills/actions/change-skill-status-action";
-import type { SkillStatusActionState } from "@/features/skills/types/skill";
 
 type SkillStatusActionProps = {
   organizationSlug: string;
@@ -11,91 +7,16 @@ type SkillStatusActionProps = {
   active: boolean;
 };
 
-const initialState: SkillStatusActionState = {
-  status: "idle",
-  message: null,
-};
-
 export function SkillStatusAction({
   organizationSlug,
   skillId,
   active,
 }: SkillStatusActionProps) {
-  const [confirming, setConfirming] = useState(false);
   const action = changeSkillStatusAction.bind(
     null,
     organizationSlug,
     skillId,
     !active,
   );
-  const [state, formAction, pending] = useActionState(action, initialState);
-
-  if (active && !confirming) {
-    return (
-      <div className="space-y-1">
-        <button
-          type="button"
-          onClick={() => setConfirming(true)}
-          className="text-sm font-medium text-red-700 hover:text-red-900"
-        >
-          Inativar
-        </button>
-        {state.message ? (
-          <p role="status" className="max-w-52 text-xs text-zinc-600">
-            {state.message}
-          </p>
-        ) : null}
-      </div>
-    );
-  }
-
-  if (active) {
-    return (
-      <form action={formAction} className="space-y-2 rounded-lg bg-red-50 p-2">
-        <p className="text-xs text-red-900">Confirmar inativação?</p>
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={pending}
-            className="text-xs font-semibold text-red-800 disabled:opacity-60"
-          >
-            {pending ? "Inativando..." : "Confirmar"}
-          </button>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => setConfirming(false)}
-            className="text-xs font-medium text-zinc-600 disabled:opacity-60"
-          >
-            Cancelar
-          </button>
-        </div>
-        {state.message ? (
-          <p role="alert" className="text-xs text-red-800">
-            {state.message}
-          </p>
-        ) : null}
-      </form>
-    );
-  }
-
-  return (
-    <form action={formAction} className="space-y-1">
-      <button
-        type="submit"
-        disabled={pending}
-        className="text-sm font-medium text-emerald-700 hover:text-emerald-900 disabled:opacity-60"
-      >
-        {pending ? "Ativando..." : "Ativar"}
-      </button>
-      {state.message ? (
-        <p
-          role={state.status === "error" ? "alert" : "status"}
-          className="max-w-52 text-xs text-zinc-600"
-        >
-          {state.message}
-        </p>
-      ) : null}
-    </form>
-  );
+  return <CatalogStatusDialog action={action} active={active} entityName="especialidade" deactivateDescription="A especialidade deixará de estar disponível para novos vínculos e planejamentos. Os vínculos e dados históricos serão preservados." reactivateDescription="A especialidade voltará a ficar disponível para novos vínculos e planejamentos." />;
 }

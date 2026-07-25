@@ -1,5 +1,5 @@
-import Link from "next/link";
-
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
 import { ClientForm } from "@/features/clients/components/client-form";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 
@@ -12,6 +12,9 @@ export default async function NewClientPage({ params }: NewClientPageProps) {
   const listPath = `/app/${organizationSlug}/cadastros/clientes`;
 
   return (
-    <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6 lg:px-8"><div className="mx-auto max-w-3xl"><header className="mb-6"><Link href={listPath} className="text-sm font-medium text-zinc-600 hover:text-zinc-950">← Voltar para clientes</Link><p className="mt-5 text-sm font-medium text-zinc-500">{context.organization.name}</p><h1 className="mt-1 text-2xl font-bold text-zinc-950">Novo cliente</h1><p className="mt-2 text-sm text-zinc-600">Cadastre os dados principais do cliente.</p></header><section className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"><ClientForm organizationSlug={organizationSlug} initialValues={{ legalName: "", tradeName: "", taxId: "", segment: "", notes: "" }} /></section></div></main>
+    <PageContainer className="max-w-5xl space-y-6">
+      <PageHeader title="Novo cliente" description="Cadastre os dados principais para organizar as futuras unidades de atendimento." eyebrow={context.organization.name} breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Cadastros" }, { label: "Clientes", href: listPath }, { label: "Novo cliente" }]} />
+      <ClientForm organizationSlug={organizationSlug} initialValues={{ legalName: "", tradeName: "", taxId: "", segment: "", notes: "" }} />
+    </PageContainer>
   );
 }

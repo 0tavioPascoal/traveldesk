@@ -25,7 +25,7 @@ export async function getClientById(
   const { data, error } = await supabase
     .from("clients")
     .select(
-      "id, legal_name, trade_name, tax_id, segment, notes, active, updated_at",
+      "id, legal_name, trade_name, tax_id, segment, notes, active, updated_at, client_units(count)",
     )
     .eq("id", parsedId.data)
     .eq("organization_id", context.organization.id)
@@ -35,5 +35,10 @@ export async function getClientById(
     throw new Error("Não foi possível carregar o cliente.");
   }
 
-  return data;
+  if (!data) {
+    return null;
+  }
+
+  const { client_units: unitCounts, ...client } = data;
+  return { ...client, unitCount: unitCounts[0]?.count ?? 0 };
 }

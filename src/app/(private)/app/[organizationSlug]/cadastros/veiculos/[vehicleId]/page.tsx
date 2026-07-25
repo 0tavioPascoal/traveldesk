@@ -1,8 +1,14 @@
-import Link from "next/link";
-
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
+import { ActiveStatusBadge } from "@/components/ui/active-status-badge";
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
+import { dateInTimezone, formatVehiclePlate } from "@/features/vehicles/application/vehicle-presentation";
+import { VehicleOperationalBadge } from "@/features/vehicles/components/vehicle-badges";
+import { VehicleDetailActions } from "@/features/vehicles/components/vehicle-detail-actions";
 import { VehicleDetails } from "@/features/vehicles/components/vehicle-details";
 import { getVehicleById } from "@/features/vehicles/queries/get-vehicle-by-id";
+import { listVehicleOperationalPeriods } from "@/features/vehicles/queries/list-vehicle-operational-periods";
 
 type Props = {
   params: Promise<{ organizationSlug: string; vehicleId: string }>;
@@ -15,10 +21,16 @@ export default async function VehiclePage({ params, searchParams }: Props) {
     organizationSlug,
     ["admin", "coordinator"] as const,
   );
-  const [vehicle, query] = await Promise.all([
+  const [vehicle, query, periodMap] = await Promise.all([
     getVehicleById(organizationSlug, vehicleId),
     searchParams,
+    listVehicleOperationalPeriods(organizationSlug, [vehicleId]),
   ]);
   const feedback = Array.isArray(query.feedback) ? query.feedback[0] : query.feedback;
-  return <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6"><div className="mx-auto max-w-5xl space-y-6"><header><Link href={`/app/${organizationSlug}/cadastros/veiculos`} className="text-sm font-medium text-zinc-600">← Voltar aos veículos</Link><h1 className="mt-2 text-2xl font-bold">Detalhes do veículo</h1></header>{feedback ? <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{feedback === "created" ? "Veículo cadastrado com sucesso." : "Veículo atualizado com sucesso."}</p> : null}<VehicleDetails organizationSlug={organizationSlug} vehicle={vehicle} timezone={context.organization.timezone} /></div></main>;
+  const feedbackMessage = feedback === "created" ? "Veículo cadastrado com sucesso." : feedback === "updated" ? "Veículo atualizado com sucesso." : null;
+  const now = new Date();
+  const referenceDate = dateInTimezone(now, context.organization.timezone);
+  const plate = formatVehiclePlate(vehicle.plate);
+  const periods = periodMap.get(vehicleId) ?? { unavailabilities: [], reservations: [] };
+  return <PageContainer className="max-w-7xl space-y-6"><PageHeader title={plate} eyebrow={`${vehicle.brand} ${vehicle.model}${vehicle.model_year ? ` · ${vehicle.model_year}` : ""}`} description={`${vehicle.base_city}/${vehicle.base_state}`} breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Veículos", href: `/app/${organizationSlug}/cadastros/veiculos` }, { label: plate }]} actions={<div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"><ActiveStatusBadge active={vehicle.active} /><VehicleOperationalBadge status={vehicle.operational_status} /><VehicleDetailActions organizationSlug={organizationSlug} vehicleId={vehicleId} plate={plate} active={vehicle.active} operationalStatus={vehicle.operational_status} /></div>} />{feedbackMessage ? <InlineAlert tone="success">{feedbackMessage}</InlineAlert> : null}<VehicleDetails organizationSlug={organizationSlug} vehicle={vehicle} timezone={context.organization.timezone} referenceDate={referenceDate} referenceTime={now.toISOString()} periods={periods} /></PageContainer>;
 }

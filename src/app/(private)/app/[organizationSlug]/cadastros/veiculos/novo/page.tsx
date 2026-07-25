@@ -1,5 +1,5 @@
-import Link from "next/link";
-
+import { PageContainer } from "@/components/page/page-container";
+import { PageHeader } from "@/components/page/page-header";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { VehicleForm } from "@/features/vehicles/components/vehicle-form";
 
@@ -9,5 +9,5 @@ export default async function NewVehiclePage({ params }: { params: Promise<{ org
     organizationSlug,
     ["admin", "coordinator"] as const,
   );
-  return <main className="min-h-screen bg-zinc-100 px-4 py-8 sm:px-6"><div className="mx-auto max-w-5xl"><Link href={`/app/${organizationSlug}/cadastros/veiculos`} className="text-sm font-medium text-zinc-600">← Voltar aos veículos</Link><div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm"><h1 className="text-2xl font-bold">Novo veículo</h1><p className="mt-1 text-sm text-zinc-600">Cadastre os dados operacionais do veículo.</p><div className="mt-6"><VehicleForm organizationSlug={organizationSlug} role={context.membership.role as "admin" | "coordinator"} currentMileage={null} initialValues={{ plate: "", brand: "", model: "", manufactureYear: "", modelYear: "", passengerCapacity: "", baseCity: "", baseState: "", currentMileage: "", operationalStatus: "available", licensingExpiresAt: "", maintenanceDueAt: "", notes: "" }} /></div></div></div></main>;
+  return <PageContainer className="max-w-5xl space-y-6"><PageHeader title="Novo veículo" description="Cadastre a identificação, capacidade e dados operacionais do veículo." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Veículos", href: `/app/${organizationSlug}/cadastros/veiculos` }, { label: "Novo veículo" }]} /><VehicleForm organizationSlug={organizationSlug} role={context.membership.role as "admin" | "coordinator"} currentMileage={null} initialValues={{ plate: "", brand: "", model: "", manufactureYear: "", modelYear: "", passengerCapacity: "", baseCity: "", baseState: "", currentMileage: "", operationalStatus: "available", licensingExpiresAt: "", maintenanceDueAt: "", notes: "" }} /></PageContainer>;
 }
