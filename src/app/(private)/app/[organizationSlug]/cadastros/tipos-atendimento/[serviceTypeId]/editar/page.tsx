@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { PageContainer } from "@/components/page/page-container";
+import { FormPageContainer } from "@/components/page/page-container";
 import { PageHeader } from "@/components/page/page-header";
 import { ServiceTypeForm } from "@/features/service-types/components/service-type-form";
 import { getServiceTypeById } from "@/features/service-types/queries/get-service-type-by-id";
@@ -25,9 +25,8 @@ export default async function EditServiceTypePage({
   const listPath = `/app/${organizationSlug}/cadastros/tipos-atendimento`;
 
   return (
-    <PageContainer className="max-w-3xl space-y-6">
+    <FormPageContainer>
         <PageHeader title="Editar tipo de atendimento" description="Atualize a categoria e sua disponibilidade para novos atendimentos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Tipos de atendimento", href: listPath }, { label: "Editar" }]} />
-        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
           <ServiceTypeForm
             organizationSlug={organizationSlug}
             serviceTypeId={serviceType.id}
@@ -37,7 +36,6 @@ export default async function EditServiceTypePage({
               active: serviceType.active,
             }}
           />
-        </section>
-    </PageContainer>
+    </FormPageContainer>
   );
 }

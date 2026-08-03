@@ -12,5 +12,5 @@ export function ServiceTypeFilters({
 }: ServiceTypeFiltersProps) {
   const listPath = `/app/${organizationSlug}/cadastros/tipos-atendimento`;
 
-  return <CatalogFilters path={listPath} query={filters.query} status={filters.status} placeholder="Buscar tipo de atendimento..." />;
+  return <CatalogFilters path={listPath} query={filters.query} status={filters.status} placeholder="Pesquisar tipo de atendimento..." />;
 }

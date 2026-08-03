@@ -1,3 +1,5 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { FormPageSkeleton } from "@/components/forms/form-page-skeleton";
 
-export function UnavailabilityFormSkeleton() { return <div className="space-y-6" role="status" aria-label="Carregando formulário"><div className="space-y-3"><Skeleton className="h-8 w-72" /><Skeleton className="h-5 w-full max-w-2xl" /></div><div className="rounded-2xl border border-border bg-card p-5 sm:p-6"><div className="grid gap-5 sm:grid-cols-2">{Array.from({ length: 6 }, (_, index) => <div key={index} className={index > 3 ? "sm:col-span-2" : ""}><Skeleton className="mb-2 h-4 w-32" /><Skeleton className={index > 3 ? "h-28" : "h-11"} /></div>)}</div></div><span className="sr-only">Carregando formulário...</span></div>; }
+export function UnavailabilityFormSkeleton() {
+  return <FormPageSkeleton sections={3} />;
+}

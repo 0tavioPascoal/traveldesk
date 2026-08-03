@@ -76,6 +76,7 @@ export type VehicleFilters = {
   baseState: string;
   minimumCapacity: string;
   page: number;
+  pageSize: number;
 };
 
 export type VehicleListResult = {

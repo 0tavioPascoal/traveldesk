@@ -1,6 +1,15 @@
 import Link from "next/link";
 import { Car, MapPin } from "lucide-react";
 
+import {
+  DataTableShell,
+  dataTableHeaderStyles,
+  dataTableStyles,
+} from "@/components/list-page/data-table-shell";
+import {
+  MobileRecordCard,
+  MobileRecordList,
+} from "@/components/list-page/mobile-record-list";
 import { ActiveStatusBadge } from "@/components/ui/active-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -44,25 +53,25 @@ export function TechnicianList({ organizationSlug, technicians, timezone, refere
     : <EmptyState title="Nenhum técnico cadastrado" description="Cadastre o primeiro técnico para começar a organizar as viagens e especialidades." action={{ href: `${base}/novo`, label: "Novo técnico" }} />;
 
   return <>
-    <div className="hidden overflow-hidden rounded-2xl border border-border bg-card lg:block">
-      <table className="w-full table-fixed text-left">
-        <thead className="border-b border-border bg-muted/70 text-xs font-semibold uppercase tracking-wide text-muted-foreground"><tr><th scope="col" className="w-[22%] px-4 py-3">Técnico</th><th scope="col" className="w-[22%] px-4 py-3">Especialidades</th><th scope="col" className="w-[13%] px-4 py-3">Localidade-base</th><th scope="col" className="w-[19%] px-4 py-3">Habilitação</th><th scope="col" className="w-[13%] px-4 py-3">Disponibilidade</th><th scope="col" className="w-[8%] px-4 py-3">Situação</th><th scope="col" className="w-[3%] px-2 py-3"><span className="sr-only">Ações</span></th></tr></thead>
+    <DataTableShell>
+      <table className={`${dataTableStyles} table-fixed`}>
+        <thead className={dataTableHeaderStyles}><tr><th scope="col" className="w-[22%] px-4 py-3">Técnico</th><th data-list-column="technicians:skills" scope="col" className="w-[22%] px-4 py-3">Especialidades</th><th data-list-column="technicians:base" scope="col" className="w-[13%] px-4 py-3">Localidade-base</th><th data-list-column="technicians:license" scope="col" className="w-[19%] px-4 py-3">Habilitação</th><th data-list-column="technicians:availability" scope="col" className="w-[13%] px-4 py-3">Disponibilidade</th><th scope="col" className="w-[8%] px-4 py-3">Situação</th><th scope="col" className="w-20 px-2 py-3 text-right">Ações</th></tr></thead>
         <tbody className="divide-y divide-border">{technicians.map((technician) => <tr key={technician.id} className="align-top hover:bg-muted/30">
           <td className="px-4 py-4"><Link href={`${base}/${technician.id}`} className="font-semibold text-foreground hover:text-primary hover:underline">{technician.name}</Link><Secondary technician={technician} /></td>
-          <td className="px-4 py-4"><Skills technician={technician} /></td>
-          <td className="px-4 py-4 text-sm text-foreground">{technician.base_city}/{technician.base_state}</td>
-          <td className="px-4 py-4"><License technician={technician} referenceDate={referenceDate} /></td>
-          <td className="px-4 py-4"><Availability technician={technician} timezone={timezone} /></td>
+          <td data-list-column="technicians:skills" className="px-4 py-4"><Skills technician={technician} /></td>
+          <td data-list-column="technicians:base" className="px-4 py-4 text-sm text-foreground">{technician.base_city}/{technician.base_state}</td>
+          <td data-list-column="technicians:license" className="px-4 py-4"><License technician={technician} referenceDate={referenceDate} /></td>
+          <td data-list-column="technicians:availability" className="px-4 py-4"><Availability technician={technician} timezone={timezone} /></td>
           <td className="px-4 py-4"><ActiveStatusBadge active={technician.active} /></td>
           <td className="px-2 py-3"><TechnicianRowActions organizationSlug={organizationSlug} technicianId={technician.id} technicianName={technician.name} active={technician.active} /></td>
         </tr>)}</tbody>
       </table>
-    </div>
-    <div className="grid gap-3 lg:hidden">{technicians.map((technician) => <article key={technician.id} className="rounded-2xl border border-border bg-card p-4">
+    </DataTableShell>
+    <MobileRecordList label="Técnicos cadastrados">{technicians.map((technician) => <MobileRecordCard key={technician.id}>
       <div className="flex items-start justify-between gap-3"><div className="min-w-0"><Link href={`${base}/${technician.id}`} className="font-semibold text-foreground hover:underline">{technician.name}</Link><Secondary technician={technician} /></div><ActiveStatusBadge active={technician.active} /></div>
-      <div className="mt-3"><Skills technician={technician} /></div>
-      <div className="mt-4 grid gap-2.5 text-sm sm:grid-cols-2"><p className="flex items-center gap-2 text-muted-foreground"><MapPin aria-hidden="true" className="size-4 shrink-0" /><span>{technician.base_city}/{technician.base_state}</span></p><div className="flex gap-2 text-muted-foreground"><Car aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><License technician={technician} referenceDate={referenceDate} /></div></div>
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3"><Availability technician={technician} timezone={timezone} /><TechnicianRowActions organizationSlug={organizationSlug} technicianId={technician.id} technicianName={technician.name} active={technician.active} /></div>
-    </article>)}</div>
+      <div data-list-column="technicians:skills" className="mt-3"><Skills technician={technician} /></div>
+      <div className="mt-4 grid gap-2.5 text-sm sm:grid-cols-2"><p data-list-column="technicians:base" className="flex items-center gap-2 text-muted-foreground"><MapPin aria-hidden="true" className="size-4 shrink-0" /><span>{technician.base_city}/{technician.base_state}</span></p><div data-list-column="technicians:license" className="flex gap-2 text-muted-foreground"><Car aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><License technician={technician} referenceDate={referenceDate} /></div></div>
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-3"><div data-list-column="technicians:availability"><Availability technician={technician} timezone={timezone} /></div><TechnicianRowActions organizationSlug={organizationSlug} technicianId={technician.id} technicianName={technician.name} active={technician.active} /></div>
+    </MobileRecordCard>)}</MobileRecordList>
   </>;
 }

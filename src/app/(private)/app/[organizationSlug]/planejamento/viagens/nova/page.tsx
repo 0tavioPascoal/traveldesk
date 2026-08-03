@@ -1,8 +1,7 @@
 import Link from "next/link";
 
-import { PageContainer } from "@/components/page/page-container";
+import { FormPageContainer } from "@/components/page/page-container";
 import { PageHeader } from "@/components/page/page-header";
-import { buttonStyles } from "@/components/ui/button";
 import { InlineAlert } from "@/components/ui/inline-alert";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { TripForm } from "@/features/trips/components/trip-form";
@@ -21,20 +20,18 @@ export default async function NewTripPage({ params }: { params: Promise<{ organi
   const basePath = `/app/${organizationSlug}/planejamento/viagens`;
 
   return (
-    <PageContainer className="space-y-6">
+    <FormPageContainer>
       <PageHeader
         title="Nova viagem"
         description="Cadastre os dados iniciais para planejar uma nova viagem técnica."
         breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Viagens", href: basePath }, { label: "Nova viagem" }]}
-        actions={<Link href={basePath} className={buttonStyles({ variant: "secondary" })}>Voltar às viagens</Link>}
       />
       {!hasClientWithUnit ? (
         <InlineAlert tone="warning">
           <div><p className="font-semibold">É necessário ter um cliente ativo com ao menos uma unidade ativa.</p><Link href={`/app/${organizationSlug}/cadastros/clientes`} className="mt-2 inline-block font-semibold underline">Ir para clientes e unidades</Link></div>
         </InlineAlert>
       ) : (
-        <div className="mx-auto w-full max-w-6xl">
-              <TripForm
+        <TripForm
                 mode="create"
                 organizationSlug={organizationSlug}
                 timezone={context.organization.timezone}
@@ -45,9 +42,8 @@ export default async function NewTripPage({ params }: { params: Promise<{ organi
                   serviceStartsAt: "", serviceEndsAt: "", originCity: "", originState: "",
                   destinationCity: "", destinationState: "", notes: "",
                 }}
-              />
-        </div>
+        />
       )}
-    </PageContainer>
+    </FormPageContainer>
   );
 }

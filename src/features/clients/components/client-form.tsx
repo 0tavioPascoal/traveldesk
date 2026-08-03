@@ -3,6 +3,13 @@
 import { Building2, FileText } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import {
+  FormActions,
+  formControlClassName,
+  formSectionClassName,
+  formTextareaClassName,
+} from "@/components/forms/form-layout";
+import { useFocusFirstInvalid } from "@/components/forms/use-focus-first-invalid";
 import { SectionHeader } from "@/components/page/section-header";
 import { buttonStyles } from "@/components/ui/button";
 import { InlineAlert } from "@/components/ui/inline-alert";
@@ -13,22 +20,23 @@ import type { ClientActionState, ClientFormValues } from "@/features/clients/typ
 
 type ClientFormProps = { organizationSlug: string; initialValues: ClientFormValues; clientId?: string };
 
-const inputClassName = "h-11 w-full rounded-lg border border-input bg-card px-3 text-base text-card-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted sm:text-sm";
-const textareaClassName = "w-full resize-y rounded-lg border border-input bg-card px-3 py-2.5 text-base text-card-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted sm:text-sm";
+const inputClassName = formControlClassName;
+const textareaClassName = formTextareaClassName;
 
 export function ClientForm({ organizationSlug, initialValues, clientId }: ClientFormProps) {
   const action = clientId ? updateClientAction.bind(null, organizationSlug, clientId) : createClientAction.bind(null, organizationSlug);
   const initialState: ClientActionState = { status: "idle", fieldErrors: {}, message: null, values: initialValues };
   const [state, formAction, pending] = useActionState(action, initialState);
+  const formRef = useFocusFirstInvalid(state.fieldErrors);
   const [dirty, setDirty] = useState(false);
   const cancelPath = clientId ? `/app/${organizationSlug}/cadastros/clientes/${clientId}` : `/app/${organizationSlug}/cadastros/clientes`;
   const error = (field: keyof ClientFormValues) => state.fieldErrors[field]?.[0];
 
   return (
-    <form action={formAction} noValidate onChange={() => setDirty(true)} className="space-y-6">
+    <form ref={formRef} action={formAction} noValidate onChange={() => setDirty(true)} className="space-y-6">
       {state.message ? <InlineAlert tone="error">{state.message}</InlineAlert> : null}
 
-      <section aria-labelledby="client-main-title" className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <section aria-labelledby="client-main-title" className={formSectionClassName}>
         <SectionHeader id="client-main-title" title="Informações principais" description="Identificação cadastral utilizada em viagens e unidades." />
         <div className="mt-6 grid gap-5 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
@@ -55,7 +63,7 @@ export function ClientForm({ organizationSlug, initialValues, clientId }: Client
         </div>
       </section>
 
-      <section aria-labelledby="client-notes-title" className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <section aria-labelledby="client-notes-title" className={formSectionClassName}>
         <SectionHeader id="client-notes-title" title="Observações" description="Informações adicionais úteis para a coordenação." />
         <div className="mt-6 space-y-1.5">
           <label htmlFor="notes" className="text-sm font-medium text-foreground">Observações internas</label>
@@ -69,10 +77,10 @@ export function ClientForm({ organizationSlug, initialValues, clientId }: Client
         <div className="flex gap-3"><Building2 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-primary" /><div><h2 className="font-semibold text-foreground">Após salvar</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">O cliente será criado ativo. Endereço e contato são cadastrados no contexto de cada unidade.</p></div></div>
       </aside>
 
-      <div className="sticky bottom-3 z-10 flex flex-col-reverse gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur sm:flex-row sm:justify-end">
+      <FormActions>
         <ClientFormCancel href={cancelPath} dirty={dirty} />
         <button type="submit" disabled={pending} className={buttonStyles()}><FileText aria-hidden="true" className="size-4" />{pending ? "Salvando..." : clientId ? "Salvar alterações" : "Criar cliente"}</button>
-      </div>
+      </FormActions>
     </form>
   );
 }

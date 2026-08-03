@@ -3,6 +3,13 @@
 import { Building2, Save } from "lucide-react";
 import { useActionState, useState } from "react";
 
+import {
+  FormActions,
+  formControlClassName,
+  formSectionClassName,
+  formTextareaClassName,
+} from "@/components/forms/form-layout";
+import { useFocusFirstInvalid } from "@/components/forms/use-focus-first-invalid";
 import { buttonStyles } from "@/components/ui/button";
 import { InlineAlert } from "@/components/ui/inline-alert";
 import { createClientUnitAction } from "@/features/clients/actions/create-client-unit-action";
@@ -27,10 +34,8 @@ const states = [
   "RR", "SC", "SP", "SE", "TO",
 ] as const;
 
-const inputClassName =
-  "h-11 w-full rounded-lg border border-input bg-card px-3 text-base text-card-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted sm:text-sm";
-const textareaClassName =
-  "w-full resize-y rounded-lg border border-input bg-card px-3 py-2.5 text-base text-card-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted sm:text-sm";
+const inputClassName = formControlClassName;
+const textareaClassName = formTextareaClassName;
 
 export function ClientUnitForm({
   organizationSlug,
@@ -49,6 +54,7 @@ export function ClientUnitForm({
     values: initialValues,
   };
   const [state, formAction, pending] = useActionState(action, initialState);
+  const formRef = useFocusFirstInvalid(state.fieldErrors);
   const [dirty, setDirty] = useState(false);
   const detailPath = `/app/${organizationSlug}/cadastros/clientes/${clientId}`;
 
@@ -56,7 +62,7 @@ export function ClientUnitForm({
     state.fieldErrors[field]?.[0];
 
   return (
-    <form action={formAction} noValidate onChange={() => setDirty(true)} className="space-y-6">
+    <form ref={formRef} action={formAction} noValidate onChange={() => setDirty(true)} className="space-y-6">
       {state.message ? <InlineAlert tone="error">{state.message}</InlineAlert> : null}
 
       <div className="rounded-2xl border border-border bg-accent/45 px-4 py-4 sm:px-5">
@@ -71,7 +77,7 @@ export function ClientUnitForm({
         </p></div></div>
       </div>
 
-      <fieldset className="space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <fieldset className={`${formSectionClassName} space-y-5`}>
         <legend className="px-1 text-lg font-semibold text-foreground">
           Identificação
         </legend>
@@ -103,7 +109,7 @@ export function ClientUnitForm({
         </div>
       </fieldset>
 
-      <fieldset className="space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <fieldset className={`${formSectionClassName} space-y-5`}>
         <legend className="px-1 text-lg font-semibold text-foreground">Endereço</legend>
         <div className="grid gap-5 sm:grid-cols-6">
           <div className="space-y-2 sm:col-span-4">
@@ -147,7 +153,7 @@ export function ClientUnitForm({
         </div>
       </fieldset>
 
-      <fieldset className="space-y-5 rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <fieldset className={`${formSectionClassName} space-y-5`}>
         <legend className="px-1 text-lg font-semibold text-foreground">Contato principal</legend>
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2 sm:col-span-2">
@@ -168,7 +174,7 @@ export function ClientUnitForm({
         </div>
       </fieldset>
 
-      <fieldset className="rounded-2xl border border-border bg-card p-5 sm:p-6">
+      <fieldset className={formSectionClassName}>
         <legend className="px-1 text-lg font-semibold text-foreground">Orientações e observações</legend>
       <div className="mt-1 grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
@@ -184,10 +190,10 @@ export function ClientUnitForm({
       </div>
       </fieldset>
 
-      <div className="sticky bottom-3 z-10 flex flex-col-reverse gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-lg backdrop-blur sm:flex-row sm:justify-end">
+      <FormActions>
         <ClientFormCancel href={detailPath} dirty={dirty} />
         <button type="submit" disabled={pending} className={buttonStyles()}><Save aria-hidden="true" className="size-4" />{pending ? "Salvando..." : unitId ? "Salvar alterações" : "Criar unidade"}</button>
-      </div>
+      </FormActions>
     </form>
   );
 }

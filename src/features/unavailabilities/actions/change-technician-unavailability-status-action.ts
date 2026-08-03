@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { unavailabilityErrorMessage } from "@/features/unavailabilities/actions/unavailability-action-message";
 import { changeTechnicianUnavailabilityStatus } from "@/features/unavailabilities/application/change-technician-unavailability-status";
 import { unavailabilityStatusSchema } from "@/features/unavailabilities/schemas/unavailability-schema";
@@ -21,5 +22,6 @@ export async function changeTechnicianUnavailabilityStatusAction(
   const result = await changeTechnicianUnavailabilityStatus(organizationSlug, parsed.data.id, parsed.data.active);
   if (!result.success) return { status: "error", message: unavailabilityErrorMessage(result.reason) };
   revalidatePath(`/app/${organizationSlug}/planejamento/indisponibilidades`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: active ? "Indisponibilidade reativada." : "Indisponibilidade inativada." };
 }

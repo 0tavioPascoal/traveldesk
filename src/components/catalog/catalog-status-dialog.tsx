@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useId, useRef } from "react";
+import { useActionState, useEffect, useId, useRef } from "react";
 
 import { Button, buttonStyles } from "@/components/ui/button";
 import { InlineAlert } from "@/components/ui/inline-alert";
@@ -33,6 +33,10 @@ export function CatalogStatusDialog({
   const title = active ? `Inativar ${entityName}?` : `Reativar ${entityName}?`;
   const description = active ? deactivateDescription : reactivateDescription;
 
+  useEffect(() => {
+    if (state.status === "success") dialogRef.current?.close();
+  }, [state.status]);
+
   return (
     <>
       <button
@@ -49,6 +53,9 @@ export function CatalogStatusDialog({
         className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-border bg-popover p-0 text-popover-foreground shadow-xl backdrop:bg-foreground/35"
         onClick={(event) => {
           if (event.target === event.currentTarget && !pending) event.currentTarget.close();
+        }}
+        onCancel={(event) => {
+          if (pending) event.preventDefault();
         }}
       >
         <form action={formAction} className="space-y-5 p-5 sm:p-6">

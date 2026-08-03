@@ -1,6 +1,14 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { PageContainer } from "@/components/page/page-container";
+import {
+  ListPageContent,
+  ListPageFooter,
+  ListPageShell,
+} from "@/components/list-page/list-page-shell";
+import { ListPagination } from "@/components/list-page/list-pagination";
+import { ListToolbar } from "@/components/list-page/list-toolbar";
+import { RefreshListButton } from "@/components/list-page/refresh-list-button";
 import { PageHeader } from "@/components/page/page-header";
 import { buttonStyles } from "@/components/ui/button";
 import { InlineAlert } from "@/components/ui/inline-alert";
@@ -55,25 +63,28 @@ export default async function SkillsPage({
   const hasFilters = filters.query !== "" || filters.status !== "all";
 
   return (
-    <PageContainer className="max-w-6xl space-y-6">
-        <PageHeader title="Especialidades" description="Gerencie as competências utilizadas na composição das equipes técnicas." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Cadastros" }, { label: "Especialidades" }]} actions={<Link href={`/app/${organizationSlug}/cadastros/especialidades/nova`} className={`${buttonStyles()} w-full sm:w-auto`}>Nova especialidade</Link>} />
+    <ListPageShell>
+        <PageHeader title="Especialidades" description="Gerencie as competências utilizadas na composição das equipes técnicas." breadcrumbs={[{ label: "Cadastros" }, { label: "Especialidades" }]} />
 
         {feedback ? (
           <InlineAlert tone="success">{feedback}</InlineAlert>
         ) : null}
 
-        <section aria-label="Pesquisa e filtros" className="rounded-2xl border border-border bg-card p-5">
+        <ListToolbar actions={<><Link href={`/app/${organizationSlug}/cadastros/especialidades/nova`} className={buttonStyles({ size: "sm" })}><Plus aria-hidden="true" className="size-4" />Nova especialidade</Link><RefreshListButton /></>}>
           <SkillFilters organizationSlug={organizationSlug} filters={filters} />
-        </section>
+        </ListToolbar>
 
-        <section>
+        <ListPageContent>
           <SkillList
-            organizationSlug={organizationSlug}
-            skills={skills}
-            timezone={context.organization.timezone}
-            hasFilters={hasFilters}
+              organizationSlug={organizationSlug}
+              skills={skills}
+              timezone={context.organization.timezone}
+              hasFilters={hasFilters}
           />
-        </section>
-    </PageContainer>
+        </ListPageContent>
+        <ListPageFooter>
+          <ListPagination ariaLabel="Resumo de especialidades" page={1} totalPages={1} total={skills.length} pageSize={Math.max(skills.length, 1)} itemName={{ singular: "especialidade", plural: "especialidades" }} href={() => `/app/${organizationSlug}/cadastros/especialidades`} />
+        </ListPageFooter>
+    </ListPageShell>
   );
 }

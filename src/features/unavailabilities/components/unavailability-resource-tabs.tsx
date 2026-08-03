@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { ListTabs } from "@/components/list-page/list-tabs";
 import type { UnavailabilityFilters, UnavailabilityResourceFilter } from "@/features/unavailabilities/types/unavailability";
 
 const options: Array<{ value: UnavailabilityResourceFilter; label: string }> = [
@@ -24,24 +23,19 @@ export function UnavailabilityResourceTabs({
     if (filters.endsOn) params.set("endsOn", filters.endsOn);
     if (filters.temporalStatus !== "all") params.set("temporalStatus", filters.temporalStatus);
     if (filters.status !== "all") params.set("status", filters.status);
+    if (filters.pageSize !== 20) params.set("pageSize", String(filters.pageSize));
     const query = params.toString();
     return `${path}${query ? `?${query}` : ""}`;
   }
 
   return (
-    <nav aria-label="Tipo de recurso" className="inline-flex w-full rounded-xl border border-border bg-card p-1 sm:w-auto">
-      {options.map((option) => (
-        <Link
-          key={option.value}
-          href={href(option.value)}
-          aria-current={filters.resource === option.value ? "page" : undefined}
-          className={filters.resource === option.value
-            ? "flex min-h-10 flex-1 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground sm:flex-none"
-            : "flex min-h-10 flex-1 items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground hover:bg-muted hover:text-foreground sm:flex-none"}
-        >
-          {option.label}
-        </Link>
-      ))}
-    </nav>
+    <ListTabs
+      label="Tipo de recurso"
+      items={options.map((option) => ({
+        href: href(option.value),
+        label: option.label,
+        active: filters.resource === option.value,
+      }))}
+    />
   );
 }

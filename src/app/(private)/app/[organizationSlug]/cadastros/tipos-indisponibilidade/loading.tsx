@@ -1,3 +1,5 @@
-import { CatalogListSkeleton } from "@/components/catalog/catalog-skeleton";
+import { ListPageSkeleton } from "@/components/list-page/list-page-skeleton";
 
-export default function Loading() { return <CatalogListSkeleton />; }
+export default function Loading() {
+  return <ListPageSkeleton hasTabs />;
+}

@@ -22,7 +22,7 @@ export async function listVehicles(
 ): Promise<VehicleListResult> {
   const context = await requireOrganizationRole(organizationSlug, roles);
   const supabase = await createClient();
-  const pageSize = 20;
+  const pageSize = filters.pageSize;
   let query = supabase
     .from("vehicles")
     .select("id, plate, brand, model, manufacture_year, model_year, passenger_capacity, base_city, base_state, current_mileage, operational_status, licensing_expires_at, maintenance_due_at, active, updated_at", { count: "exact" })

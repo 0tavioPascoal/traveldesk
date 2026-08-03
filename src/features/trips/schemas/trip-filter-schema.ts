@@ -9,4 +9,6 @@ export const tripFilterSchema = z.object({
   priority: z.preprocess(first, z.enum(["all", "low", "normal", "high", "urgent"]).catch("all").default("all")),
   startsOn: date,
   endsOn: date,
+  page: z.preprocess(first, z.coerce.number().int().min(1).catch(1).default(1)),
+  pageSize: z.preprocess(first, z.coerce.number().pipe(z.union([z.literal(10), z.literal(20), z.literal(50)])).catch(20).default(20)),
 });

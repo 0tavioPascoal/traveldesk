@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { readTripFormValues } from "@/features/trips/actions/read-trip-form-values";
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { tripActionMessage } from "@/features/trips/actions/trip-action-message";
 import { updateTrip } from "@/features/trips/application/update-trip";
 import { tripFormSchema, tripIdSchema, tripSubmissionIntentSchema } from "@/features/trips/schemas/trip-schema";
@@ -25,5 +26,6 @@ export async function updateTripAction(organizationSlug: string, tripId: string,
   const listPath = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(listPath);
   revalidatePath(`${listPath}/${result.tripId}`);
+  revalidateSchedule(organizationSlug);
   redirect(`${listPath}/${result.tripId}?feedback=updated`);
 }

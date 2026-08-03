@@ -1,19 +1,24 @@
 import { PriorityBadge, StatusBadge } from "@/components/ui/semantic-badges";
 import type { TripPriority, TripStatus } from "@/features/trips/types/trip";
 
+export const tripStatusPresentation = {
+  draft: { label: "Rascunho", tone: "neutral" },
+  planned: { label: "Planejada", tone: "info" },
+  confirmed: { label: "Confirmada", tone: "success" },
+  traveling: { label: "Em deslocamento", tone: "info" },
+  at_client: { label: "No cliente", tone: "primary" },
+  in_service: { label: "Em atendimento", tone: "warning" },
+  returning: { label: "Em retorno", tone: "primary" },
+  finished: { label: "Finalizada", tone: "neutral" },
+  canceled: { label: "Cancelada", tone: "danger" },
+} as const satisfies Record<TripStatus, {
+  label: string;
+  tone: "neutral" | "primary" | "info" | "success" | "warning" | "danger";
+}>;
+
 export function TripStatusBadge({ status }: { status: TripStatus }) {
-  const config = {
-    draft: ["Rascunho", "neutral"],
-    planned: ["Planejada", "info"],
-    confirmed: ["Confirmada", "success"],
-    traveling: ["Em deslocamento", "info"],
-    at_client: ["No cliente", "primary"],
-    in_service: ["Em atendimento", "warning"],
-    returning: ["Em retorno", "primary"],
-    finished: ["Finalizada", "neutral"],
-    canceled: ["Cancelada", "danger"],
-  } as const;
-  return <StatusBadge label={config[status][0]} tone={config[status][1]} />;
+  const presentation = tripStatusPresentation[status];
+  return <StatusBadge label={presentation.label} tone={presentation.tone} />;
 }
 
 export function TripPriorityBadge({ priority }: { priority: TripPriority }) {

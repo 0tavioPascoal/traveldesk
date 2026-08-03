@@ -26,18 +26,9 @@ export function CatalogListSkeleton() {
 
 export function CatalogFormSkeleton() {
   return (
-    <PageContainer className="max-w-3xl space-y-6">
-      <div className="space-y-4">
-        <Skeleton className="h-4 w-56" />
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-5 w-full max-w-xl" />
-      </div>
-      <section className="space-y-6 rounded-2xl border border-border bg-card p-5 sm:p-6">
-        <Skeleton className="h-20" />
-        <Skeleton className="h-40" />
-        <Skeleton className="h-20" />
-        <div className="flex justify-end gap-3"><Skeleton className="h-11 w-24" /><Skeleton className="h-11 w-36" /></div>
-      </section>
+    <PageContainer className="max-w-5xl">
+      <FormPageSkeleton sections={1} />
     </PageContainer>
   );
 }
+import { FormPageSkeleton } from "@/components/forms/form-page-skeleton";

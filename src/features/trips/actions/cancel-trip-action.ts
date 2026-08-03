@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { tripActionMessage } from "@/features/trips/actions/trip-action-message";
 import { cancelTrip } from "@/features/trips/application/cancel-trip";
 import { cancelTripSchema } from "@/features/trips/schemas/trip-transition-schema";
@@ -15,5 +16,6 @@ export async function cancelTripAction(organizationSlug: string, tripId: string,
   if (!result.success) return { status: "error", message: tripActionMessage(result.reason) };
   const base = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(base); revalidatePath(`${base}/${tripId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: "Viagem cancelada." };
 }

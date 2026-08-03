@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { PageContainer } from "@/components/page/page-container";
+import { FormPageContainer } from "@/components/page/page-container";
 import { PageHeader } from "@/components/page/page-header";
 import { SkillForm } from "@/features/skills/components/skill-form";
 import { getSkillById } from "@/features/skills/queries/get-skill-by-id";
@@ -20,9 +20,8 @@ export default async function EditSkillPage({ params }: EditSkillPageProps) {
   const listPath = `/app/${organizationSlug}/cadastros/especialidades`;
 
   return (
-    <PageContainer className="max-w-3xl space-y-6">
+    <FormPageContainer>
         <PageHeader title="Editar especialidade" description="Atualize a competência e sua disponibilidade para novos vínculos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Especialidades", href: listPath }, { label: "Editar" }]} />
-        <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
           <SkillForm
             organizationSlug={organizationSlug}
             skillId={skill.id}
@@ -32,7 +31,6 @@ export default async function EditSkillPage({ params }: EditSkillPageProps) {
               active: skill.active,
             }}
           />
-        </section>
-    </PageContainer>
+    </FormPageContainer>
   );
 }

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/page/page-container";
 import { Breadcrumb } from "@/components/page/breadcrumb";
 import { InlineAlert } from "@/components/ui/inline-alert";
-import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
+import { requireOrganizationMember } from "@/features/organizations/application/require-organization-member";
 import { listActiveSkills } from "@/features/skills/queries/list-active-skills";
 import { TripDetails } from "@/features/trips/components/trip-details";
 import { TripActionsMenu } from "@/features/trips/components/trip-actions-menu";
@@ -17,6 +17,7 @@ import { TripConfirmationSection } from "@/features/trips/components/trip-confir
 import { TripOvernightSection } from "@/features/trips/components/trip-overnight-section";
 import { TripTeamSection } from "@/features/trips/components/trip-team-section";
 import { TripTransportSection } from "@/features/trips/components/trip-transport-section";
+import { TechnicianOperationalTripDetails } from "@/features/trips/components/technician-operational-trip-details";
 import { getTripById } from "@/features/trips/queries/get-trip-by-id";
 import { getTripConfirmationReadiness } from "@/features/trips/queries/get-trip-confirmation-readiness";
 import { getTripExecutionSummary } from "@/features/trips/queries/get-trip-execution-summary";
@@ -24,6 +25,7 @@ import { getTripOvernightSummary } from "@/features/trips/queries/get-trip-overn
 import { getTripTeamSummary } from "@/features/trips/queries/get-trip-team-summary";
 import { getTripTransportSummary } from "@/features/trips/queries/get-trip-transport-summary";
 import { listAvailableTechniciansForTrip } from "@/features/trips/queries/list-available-technicians-for-trip";
+import { listTechnicianOperationalTrips } from "@/features/trips/queries/list-technician-operational-trips";
 import { tripIdSchema } from "@/features/trips/schemas/trip-schema";
 
 type Props = {
@@ -35,10 +37,25 @@ export default async function TripPage({ params, searchParams }: Props) {
   const { organizationSlug, tripId } = await params;
   const parsedId = tripIdSchema.safeParse(tripId);
   if (!parsedId.success) notFound();
-  const context = await requireOrganizationRole(
-    organizationSlug,
-    ["admin", "coordinator"] as const,
-  );
+  const memberContext = await requireOrganizationMember(organizationSlug);
+
+  if (memberContext.membership.role === "technician") {
+    const [trip] = await listTechnicianOperationalTrips(organizationSlug, parsedId.data, 1);
+    if (!trip) notFound();
+    const execution = await getTripExecutionSummary(organizationSlug, trip.id, trip.status);
+    return (
+      <PageContainer className="max-w-5xl space-y-6">
+        <TechnicianOperationalTripDetails
+          organizationSlug={organizationSlug}
+          timezone={memberContext.organization.timezone}
+          trip={trip}
+          execution={execution}
+        />
+      </PageContainer>
+    );
+  }
+
+  const context = memberContext;
   const [trip, query] = await Promise.all([
     getTripById(organizationSlug, parsedId.data),
     searchParams,

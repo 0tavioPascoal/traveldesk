@@ -1,5 +1,9 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
-import { PageContainer } from "@/components/page/page-container";
+import { ColumnVisibilityMenu } from "@/components/list-page/column-visibility-menu";
+import { ListPageContent, ListPageFooter, ListPageShell } from "@/components/list-page/list-page-shell";
+import { ListToolbar } from "@/components/list-page/list-toolbar";
+import { RefreshListButton } from "@/components/list-page/refresh-list-button";
 import { PageHeader } from "@/components/page/page-header";
 import { buttonStyles } from "@/components/ui/button";
 import { TechnicianFilters } from "@/features/technicians/components/technician-filters";
@@ -19,5 +23,5 @@ export default async function TechniciansPage({ params, searchParams }: Props) {
   const [result, skills] = await Promise.all([listTechnicians(organizationSlug, filters), listActiveSkills(organizationSlug)]);
   const hasFilters = Boolean(filters.query || filters.skillId || filters.baseState || filters.status !== "all" || filters.canDrive !== "all" || filters.page > 1);
   const referenceDate = dateInTimezone(new Date(), context.organization.timezone);
-  return <PageContainer className="space-y-6"><PageHeader title="Técnicos" description="Gerencie os técnicos, suas especialidades e disponibilidade operacional." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Cadastros" }, { label: "Técnicos" }]} actions={<Link href={`/app/${organizationSlug}/cadastros/tecnicos/novo`} className={buttonStyles()}>Novo técnico</Link>} /><section aria-label="Filtros de técnicos" className="rounded-2xl border border-border bg-card p-4 sm:p-5"><TechnicianFilters organizationSlug={organizationSlug} filters={filters} skills={skills} /></section><TechnicianList organizationSlug={organizationSlug} technicians={result.items} timezone={context.organization.timezone} referenceDate={referenceDate} hasFilters={hasFilters} /><TechnicianPagination organizationSlug={organizationSlug} filters={filters} total={result.total} totalPages={result.totalPages} pageSize={result.pageSize} /></PageContainer>;
+  return <ListPageShell><PageHeader title="Técnicos" description="Gerencie os técnicos, suas especialidades e disponibilidade operacional." breadcrumbs={[{ label: "Cadastros" }, { label: "Técnicos" }]} /><ListToolbar actions={<><Link href={`/app/${organizationSlug}/cadastros/tecnicos/novo`} className={buttonStyles({ size: "sm" })}><Plus aria-hidden="true" className="size-4" />Novo técnico</Link><RefreshListButton /></>} columnControl={<ColumnVisibilityMenu listKey="technicians" columns={[{ key: "base", label: "Localidade-base" }, { key: "skills", label: "Especialidades" }, { key: "license", label: "Habilitação" }, { key: "availability", label: "Disponibilidade" }]} />}><TechnicianFilters organizationSlug={organizationSlug} filters={filters} skills={skills} /></ListToolbar><ListPageContent><TechnicianList organizationSlug={organizationSlug} technicians={result.items} timezone={context.organization.timezone} referenceDate={referenceDate} hasFilters={hasFilters} /></ListPageContent><ListPageFooter><TechnicianPagination organizationSlug={organizationSlug} filters={filters} total={result.total} totalPages={result.totalPages} pageSize={result.pageSize} /></ListPageFooter></ListPageShell>;
 }

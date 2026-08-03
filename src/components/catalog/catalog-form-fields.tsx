@@ -16,9 +16,6 @@ type CatalogFormFieldsProps = {
   activeHelp: string;
 };
 
-const fieldStyles =
-  "w-full rounded-lg border border-input bg-background text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:bg-muted disabled:opacity-70 aria-[invalid=true]:border-destructive";
-
 export function CatalogFormFields({
   idPrefix,
   values,
@@ -39,10 +36,10 @@ export function CatalogFormFields({
   const activeErrorId = `${idPrefix}-active-error`;
 
   return (
-    <>
-      <div className="space-y-2">
-        <label htmlFor={`${idPrefix}-name`} className="block text-sm font-medium text-foreground">
-          Nome
+    <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
+      <div className={formFieldClassName}>
+        <label htmlFor={`${idPrefix}-name`} className={formLabelClassName}>
+          Nome <RequiredIndicator />
         </label>
         <input
           id={`${idPrefix}-name`}
@@ -57,16 +54,16 @@ export function CatalogFormFields({
           placeholder={namePlaceholder}
           aria-invalid={nameError ? true : undefined}
           aria-describedby={nameError ? nameErrorId : nameHelpId}
-          className={`${fieldStyles} h-11 px-3 text-base sm:text-sm`}
+          className={formControlClassName}
         />
-        <p id={nameHelpId} className="text-xs text-muted-foreground">
+        <p id={nameHelpId} className={formHelpClassName}>
           Entre 2 e 120 caracteres. O nome deve ser único na organização.
         </p>
-        {nameError ? <p id={nameErrorId} role="alert" className="text-sm text-destructive">{nameError}</p> : null}
+        {nameError ? <p id={nameErrorId} role="alert" className={formErrorClassName}>{nameError}</p> : null}
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor={`${idPrefix}-description`} className="block text-sm font-medium text-foreground">
+      <div className={`${formFieldClassName} lg:col-span-2`}>
+        <label htmlFor={`${idPrefix}-description`} className={formLabelClassName}>
           Descrição
         </label>
         <textarea
@@ -78,13 +75,13 @@ export function CatalogFormFields({
           defaultValue={values.description}
           aria-invalid={descriptionError ? true : undefined}
           aria-describedby={descriptionError ? descriptionErrorId : descriptionHelpId}
-          className={`${fieldStyles} min-h-32 resize-y px-3 py-2 text-base sm:text-sm`}
+          className={formTextareaClassName}
         />
-        <p id={descriptionHelpId} className="text-xs text-muted-foreground">{descriptionHelp}</p>
-        {descriptionError ? <p id={descriptionErrorId} role="alert" className="text-sm text-destructive">{descriptionError}</p> : null}
+        <p id={descriptionHelpId} className={formHelpClassName}>{descriptionHelp}</p>
+        {descriptionError ? <p id={descriptionErrorId} role="alert" className={formErrorClassName}>{descriptionError}</p> : null}
       </div>
 
-      <div>
+      <div className="lg:col-start-2 lg:row-start-1">
         <label className="flex items-start gap-3 rounded-xl border border-border bg-muted/40 p-4">
           <input
             name="active"
@@ -100,8 +97,17 @@ export function CatalogFormFields({
             <span id={activeHelpId} className="mt-1 block text-xs leading-5 text-muted-foreground">{activeHelp}</span>
           </span>
         </label>
-        {activeError ? <p id={activeErrorId} role="alert" className="mt-2 text-sm text-destructive">{activeError}</p> : null}
+        {activeError ? <p id={activeErrorId} role="alert" className={`${formErrorClassName} mt-2`}>{activeError}</p> : null}
       </div>
-    </>
+    </div>
   );
 }
+import {
+  formControlClassName,
+  formErrorClassName,
+  formFieldClassName,
+  formHelpClassName,
+  formLabelClassName,
+  formTextareaClassName,
+  RequiredIndicator,
+} from "@/components/forms/form-layout";

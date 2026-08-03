@@ -115,6 +115,7 @@ export type TechnicianFilters = {
   canDrive: "all" | "yes" | "no";
   baseState: string;
   page: number;
+  pageSize: number;
 };
 
 export type TechnicianListResult = {

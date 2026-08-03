@@ -40,6 +40,8 @@ export type TripFilters = {
   priority: "all" | TripPriority;
   startsOn: string;
   endsOn: string;
+  page: number;
+  pageSize: number;
 };
 
 export type TripListItem = Pick<
@@ -48,6 +50,14 @@ export type TripListItem = Pick<
   | "client_unit_name_snapshot" | "destination_city" | "destination_state"
   | "travel_starts_at" | "travel_ends_at" | "priority" | "status" | "updated_at"
 > & { serviceTypeName: string | null };
+
+export type TripListResult = {
+  items: TripListItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+};
 
 export type TripDetails = Tables<"trips"> & { serviceTypeName: string | null };
 

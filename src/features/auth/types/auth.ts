@@ -12,6 +12,7 @@ export type LoginActionState = {
   status: "idle" | "error";
   fieldErrors: LoginFieldErrors;
   message: string | null;
+  email: string;
 };
 
 export type AuthenticateUserResult =

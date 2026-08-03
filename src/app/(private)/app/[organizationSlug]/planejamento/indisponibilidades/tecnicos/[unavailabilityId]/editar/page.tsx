@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { PageContainer } from "@/components/page/page-container";
+import { FormPageContainer } from "@/components/page/page-container";
 import { PageHeader } from "@/components/page/page-header";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { formatUnavailabilityPeriodForForm } from "@/features/unavailabilities/application/normalize-unavailability-period";
@@ -23,5 +23,5 @@ export default async function EditTechnicianUnavailabilityPage({ params }: { par
   if (!types.some((type) => type.id === item.typeId)) types.push({ id: item.typeId, name: item.typeName, active: false });
   const period = formatUnavailabilityPeriodForForm(item.startsAt, item.endsAt, item.allDay, context.organization.timezone);
   const path = `/app/${organizationSlug}/planejamento/indisponibilidades?resource=technicians`;
-  return <PageContainer className="max-w-5xl space-y-6"><PageHeader title="Editar indisponibilidade de técnico" description="Períodos encerrados somente podem ser corrigidos por administradores." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Indisponibilidades", href: path }, { label: "Editar indisponibilidade" }]} /><section className="rounded-2xl border border-border bg-card p-5 sm:p-6"><UnavailabilityForm organizationSlug={organizationSlug} resource="technicians" timezone={context.organization.timezone} resources={resources} types={types} unavailabilityId={unavailabilityId} initialValues={{ resourceId: item.resourceId, unavailabilityTypeId: item.typeId, startsAt: period.startsAt, endsAt: period.endsAt, allDay: item.allDay, reason: item.reason ?? "", notes: item.notes ?? "" }} /></section></PageContainer>;
+  return <FormPageContainer><PageHeader title="Editar indisponibilidade de técnico" description="Períodos encerrados somente podem ser corrigidos por administradores." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Indisponibilidades", href: path }, { label: "Editar indisponibilidade" }]} /><UnavailabilityForm organizationSlug={organizationSlug} resource="technicians" timezone={context.organization.timezone} resources={resources} types={types} unavailabilityId={unavailabilityId} initialValues={{ resourceId: item.resourceId, unavailabilityTypeId: item.typeId, startsAt: period.startsAt, endsAt: period.endsAt, allDay: item.allDay, reason: item.reason ?? "", notes: item.notes ?? "" }} /></FormPageContainer>;
 }

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { readUnavailabilityValues } from "@/features/unavailabilities/actions/read-unavailability-values";
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { unavailabilityErrorMessage } from "@/features/unavailabilities/actions/unavailability-action-message";
 import { createTechnicianUnavailability } from "@/features/unavailabilities/application/create-technician-unavailability";
 import { unavailabilityFormSchema } from "@/features/unavailabilities/schemas/unavailability-schema";
@@ -22,5 +23,6 @@ export async function createTechnicianUnavailabilityAction(
   if (!result.success) return { status: "error", message: unavailabilityErrorMessage(result.reason), fieldErrors: {}, values };
   const path = `/app/${organizationSlug}/planejamento/indisponibilidades`;
   revalidatePath(path);
+  revalidateSchedule(organizationSlug);
   redirect(`${path}?resource=technicians&feedback=created`);
 }

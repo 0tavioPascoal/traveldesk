@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { tripExecutionErrorMessage } from "@/features/trips/application/map-trip-execution-error";
 import { transitionTripStatus } from "@/features/trips/application/transition-trip-status";
 import { tripExecutionTransitionSchema } from "@/features/trips/schemas/trip-execution-schema";
@@ -30,5 +31,6 @@ export async function transitionTripStatusAction(
   const base = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(base);
   revalidatePath(`${base}/${tripId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: "Etapa da viagem registrada com sucesso." };
 }

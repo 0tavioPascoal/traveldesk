@@ -90,7 +90,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     color-scheme: dark;
     --background: #0f141b;
     --foreground: #f2f5f8;
@@ -135,6 +135,53 @@
   }
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #0f141b;
+  --foreground: #f2f5f8;
+  --card: #151c25;
+  --card-foreground: #f2f5f8;
+  --popover: #202a37;
+  --popover-foreground: #f2f5f8;
+  --border: #2d3948;
+  --input: #465567;
+  --muted-foreground: #b6c0cc;
+  --muted: #1b2430;
+  --primary: #78a9e6;
+  --primary-foreground: #0d1724;
+  --secondary: #253140;
+  --secondary-foreground: #e8edf3;
+  --accent: #1b314d;
+  --accent-foreground: #9cc1ef;
+  --destructive: #ff8a80;
+  --destructive-foreground: #2a0d0a;
+  --info: #78a9e6;
+  --info-foreground: #0d1724;
+  --success: #6bd38d;
+  --success-foreground: #0c2514;
+  --warning: #f1b75b;
+  --warning-foreground: #2b1d04;
+  --ring: #78a9e6;
+  --sidebar: #121923;
+  --sidebar-foreground: #e8edf3;
+  --sidebar-border: #2d3948;
+  --sidebar-accent: #1b314d;
+  --sidebar-accent-foreground: #9cc1ef;
+  --surface: var(--card);
+  --surface-muted: var(--muted);
+  --surface-elevated: var(--popover);
+  --border-strong: var(--input);
+  --subtle-foreground: #8693a3;
+  --primary-hover: #9cc1ef;
+  --primary-soft: var(--accent);
+  --danger: var(--destructive);
+  --focus: var(--ring);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -153,4 +200,14 @@ body {
 
 dialog::backdrop {
   background: rgb(8 15 25 / 55%);
+}
+
+@media (min-width: 64rem) {
+  .app-shell-root:has(.app-sidebar[data-collapsed="true"]) .app-shell-sidebar {
+    width: 5rem;
+  }
+
+  .app-shell-root:has(.app-sidebar[data-collapsed="true"]) .app-shell-content {
+    padding-left: 5rem;
+  }
 }

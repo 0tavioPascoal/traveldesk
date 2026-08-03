@@ -19,8 +19,8 @@ export function OrganizationRedirect({
   }, [organizationSlug, router]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-100 px-4">
-      <p aria-live="polite" className="text-sm text-zinc-600" role="status">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
+      <p aria-live="polite" className="text-sm text-muted-foreground" role="status">
         Abrindo sua organização...
       </p>
     </main>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { adjustTripOvernightCalculation } from "@/features/trips/application/adjust-trip-overnight-calculation";
 import { ensureTripOvernightCalculation } from "@/features/trips/application/ensure-trip-overnight-calculation";
 import { tripOvernightMessage } from "@/features/trips/application/map-trip-overnight-error";
@@ -17,6 +18,7 @@ import type { TripOvernightActionState } from "@/features/trips/types/trip-overn
 
 function revalidateTrip(organizationSlug: string, tripId: string) {
   revalidatePath(`/app/${organizationSlug}/planejamento/viagens/${tripId}`);
+  revalidateSchedule(organizationSlug);
 }
 
 export async function reviewTripOvernightAction(

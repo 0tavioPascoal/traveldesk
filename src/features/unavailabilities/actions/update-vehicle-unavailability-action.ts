@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { readUnavailabilityValues } from "@/features/unavailabilities/actions/read-unavailability-values";
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { unavailabilityErrorMessage } from "@/features/unavailabilities/actions/unavailability-action-message";
 import { updateVehicleUnavailability } from "@/features/unavailabilities/application/update-vehicle-unavailability";
 import { unavailabilityFormSchema, unavailabilityIdSchema } from "@/features/unavailabilities/schemas/unavailability-schema";
@@ -24,5 +25,6 @@ export async function updateVehicleUnavailabilityAction(
   if (!result.success) return { status: "error", message: unavailabilityErrorMessage(result.reason), fieldErrors: {}, values };
   const path = `/app/${organizationSlug}/planejamento/indisponibilidades`;
   revalidatePath(path);
+  revalidateSchedule(organizationSlug);
   redirect(`${path}?resource=vehicles&feedback=updated`);
 }

@@ -1,8 +1,15 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { PageContainer } from "@/components/page/page-container";
+import {
+  ListPageContent,
+  ListPageFooter,
+  ListPageShell,
+} from "@/components/list-page/list-page-shell";
+import { ListPagination } from "@/components/list-page/list-pagination";
+import { ListToolbar } from "@/components/list-page/list-toolbar";
+import { RefreshListButton } from "@/components/list-page/refresh-list-button";
 import { PageHeader } from "@/components/page/page-header";
-import { SectionHeader } from "@/components/page/section-header";
 import { buttonStyles } from "@/components/ui/button";
 import { InlineAlert } from "@/components/ui/inline-alert";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
@@ -23,13 +30,17 @@ export default async function TechnicianUnavailabilityTypesPage({ params, search
   const path = `/app/${organizationSlug}/cadastros/tipos-indisponibilidade/tecnicos`;
   const feedback = typeof raw.feedback === "string" ? raw.feedback : null;
   return (
-    <PageContainer className="max-w-6xl space-y-6">
-      <PageHeader title="Tipos de indisponibilidade" description="Configure os motivos utilizados para bloquear técnicos e veículos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Cadastros" }, { label: "Tipos de indisponibilidade" }]} actions={<Link href={`${path}/novo`} className={`${buttonStyles()} w-full sm:w-auto`}>Novo tipo para técnico</Link>} />
+    <ListPageShell>
+      <PageHeader title="Tipos de indisponibilidade" description="Configure os motivos utilizados para bloquear técnicos e veículos." breadcrumbs={[{ label: "Cadastros" }, { label: "Tipos de indisponibilidade" }]} />
       {feedback === "created" || feedback === "updated" ? <InlineAlert tone="success">Tipo {feedback === "created" ? "cadastrado" : "atualizado"} com sucesso.</InlineAlert> : null}
       <UnavailabilityTypeTabs organizationSlug={organizationSlug} resource="technicians" />
-      <SectionHeader title="Tipos para técnicos" description="Motivos utilizados para bloquear técnicos em novos planejamentos." />
-      <section aria-label="Pesquisa e filtros" className="rounded-2xl border border-border bg-card p-5"><UnavailabilityTypeFilters path={path} filters={filters} /></section>
-      <UnavailabilityTypeList organizationSlug={organizationSlug} resource="technicians" items={items} timezone={context.organization.timezone} hasFilters={Boolean(filters.query || filters.status !== "all")} />
-    </PageContainer>
+      <ListToolbar actions={<><Link href={`${path}/novo`} className={buttonStyles({ size: "sm" })}><Plus aria-hidden="true" className="size-4" />Novo tipo para técnico</Link><RefreshListButton /></>}><UnavailabilityTypeFilters path={path} filters={filters} /></ListToolbar>
+      <ListPageContent>
+        <UnavailabilityTypeList organizationSlug={organizationSlug} resource="technicians" items={items} timezone={context.organization.timezone} hasFilters={Boolean(filters.query || filters.status !== "all")} />
+      </ListPageContent>
+      <ListPageFooter>
+        <ListPagination ariaLabel="Resumo de tipos para técnicos" page={1} totalPages={1} total={items.length} pageSize={Math.max(items.length, 1)} itemName={{ singular: "tipo", plural: "tipos" }} href={() => path} />
+      </ListPageFooter>
+    </ListPageShell>
   );
 }

@@ -11,4 +11,5 @@ export const technicianFilterSchema = z.object({
   canDrive: z.preprocess(first, z.enum(["all", "yes", "no"]).catch("all").default("all")),
   baseState: z.preprocess(first, z.union([z.literal(""), z.string().regex(/^[A-Z]{2}$/)]).catch("").default("")),
   page: z.preprocess(first, z.coerce.number().int().min(1).max(10000).catch(1).default(1)),
+  pageSize: z.preprocess(first, z.coerce.number().pipe(z.union([z.literal(10), z.literal(20), z.literal(50)])).catch(20).default(20)),
 });

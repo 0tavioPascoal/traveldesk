@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { tripStaffingMessage } from "@/features/trips/application/map-trip-staffing-error";
 import { replaceTripRequiredSkills } from "@/features/trips/application/replace-trip-required-skills";
 import { tripRequiredSkillsSchema } from "@/features/trips/schemas/trip-required-skills-schema";
@@ -29,5 +30,6 @@ export async function saveTripRequiredSkillsAction(
   const base = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(base);
   revalidatePath(`${base}/${tripId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: "Requisitos técnicos atualizados." };
 }

@@ -46,6 +46,7 @@ export type UnavailabilityFilters = {
   temporalStatus: UnavailabilityTemporalFilter;
   status: UnavailabilityStatusFilter;
   page: number;
+  pageSize: number;
 };
 
 export type UnavailabilityListItem = {

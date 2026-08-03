@@ -8,5 +8,5 @@ export function UnavailabilityTypeFilters({
   path: string;
   filters: FilterValues;
 }) {
-  return <CatalogFilters path={path} query={filters.query} status={filters.status} placeholder="Buscar tipo de indisponibilidade..." />;
+  return <CatalogFilters path={path} query={filters.query} status={filters.status} placeholder="Pesquisar tipo..." />;
 }

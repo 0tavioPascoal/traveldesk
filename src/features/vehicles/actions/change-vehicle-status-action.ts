@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { changeVehicleStatus } from "@/features/vehicles/application/change-vehicle-status";
 import { vehicleOperationalStatusSchema } from "@/features/vehicles/schemas/vehicle-schema";
 import type { VehicleOperationalStatus, VehicleQuickActionState } from "@/features/vehicles/types/vehicle";
@@ -22,6 +23,7 @@ export async function changeVehicleStatusAction(
   const listPath = `/app/${organizationSlug}/cadastros/veiculos`;
   revalidatePath(listPath);
   revalidatePath(`${listPath}/${vehicleId}`);
+  revalidateSchedule(organizationSlug);
   const labels = { available: "disponível", maintenance: "em manutenção", blocked: "bloqueado" } as const;
   return { status: "success", message: `Veículo marcado como ${labels[operationalStatus]}.` };
 }

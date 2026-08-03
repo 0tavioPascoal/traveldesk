@@ -4,7 +4,7 @@ import Link from "next/link";
 export function DashboardQuickActions({ organizationSlug }: { organizationSlug: string }) {
   const actions = [
     { label: "Nova viagem", description: "Inicie um novo planejamento.", href: `/app/${organizationSlug}/planejamento/viagens/nova`, icon: Plus },
-    { label: "Ver viagens", description: "Consulte planejamento e execução.", href: `/app/${organizationSlug}/planejamento/viagens`, icon: CalendarRange },
+    { label: "Abrir escala", description: "Visualize a programação semanal.", href: `/app/${organizationSlug}/planejamento/escala`, icon: CalendarRange },
     { label: "Registrar indisponibilidade", description: "Bloqueie um técnico ou veículo.", href: `/app/${organizationSlug}/planejamento/indisponibilidades`, icon: CalendarPlus },
     { label: "Gerenciar técnicos", description: "Revise equipe, CNH e especialidades.", href: `/app/${organizationSlug}/cadastros/tecnicos`, icon: UsersRound },
   ];

@@ -1,9 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { PageContainer } from "@/components/page/page-container";
+import { FormPageContainer } from "@/components/page/page-container";
 import { PageHeader } from "@/components/page/page-header";
-import { buttonStyles } from "@/components/ui/button";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { formatTripDateTimeForForm } from "@/features/trips/application/normalize-trip-periods";
 import { TripForm } from "@/features/trips/components/trip-form";
@@ -30,17 +28,15 @@ export default async function EditTripPage({ params }: { params: Promise<{ organ
   const timezone = context.organization.timezone;
 
   return (
-    <PageContainer className="space-y-6">
+    <FormPageContainer>
       <PageHeader
         title="Editar viagem"
         eyebrow={trip.code}
         description={`Atualize os dados de planejamento permitidos para “${trip.title}”.`}
         breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Viagens", href: `/app/${organizationSlug}/planejamento/viagens` }, { label: trip.code, href: `/app/${organizationSlug}/planejamento/viagens/${trip.id}` }, { label: "Editar" }]}
-        actions={<Link href={`/app/${organizationSlug}/planejamento/viagens/${trip.id}`} className={buttonStyles({ variant: "secondary" })}>Voltar ao detalhe</Link>}
+        actions={<div className="flex flex-wrap gap-2"><TripStatusBadge status={trip.status} /><TripPriorityBadge priority={trip.priority} /></div>}
       />
-      <div className="flex flex-wrap gap-2"><TripStatusBadge status={trip.status} /><TripPriorityBadge priority={trip.priority} /></div>
-      <div className="mx-auto w-full max-w-6xl">
-            <TripForm
+      <TripForm
               mode="edit"
               organizationSlug={organizationSlug}
               timezone={timezone}
@@ -65,8 +61,7 @@ export default async function EditTripPage({ params }: { params: Promise<{ organ
                 destinationState: trip.destination_state ?? "",
                 notes: trip.notes ?? "",
               }}
-            />
-      </div>
-    </PageContainer>
+      />
+    </FormPageContainer>
   );
 }

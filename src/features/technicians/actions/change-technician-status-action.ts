@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { changeTechnicianStatus } from "@/features/technicians/application/change-technician-status";
 import type { TechnicianStatusActionState } from "@/features/technicians/types/technician";
 
@@ -22,5 +23,6 @@ export async function changeTechnicianStatusAction(
   const listPath = `/app/${organizationSlug}/cadastros/tecnicos`;
   revalidatePath(listPath);
   revalidatePath(`${listPath}/${technicianId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: active ? "Técnico ativado com sucesso." : "Técnico inativado com sucesso." };
 }

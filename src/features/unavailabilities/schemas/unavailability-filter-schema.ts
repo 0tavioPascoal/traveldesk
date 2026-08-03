@@ -32,6 +32,7 @@ export const unavailabilityFilterSchema = z.object({
     z.enum(["all", "active", "inactive"]).catch("all").default("all"),
   ),
   page: z.preprocess(first, z.coerce.number().int().positive().catch(1).default(1)),
+  pageSize: z.preprocess(first, z.coerce.number().pipe(z.union([z.literal(10), z.literal(20), z.literal(50)])).catch(20).default(20)),
 });
 
 export const unavailabilityTypeFilterSchema = z.object({

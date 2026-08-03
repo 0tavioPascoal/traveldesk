@@ -13,4 +13,12 @@ export const clientFilterSchema = z.object({
     firstSearchParam,
     z.enum(["all", "active", "inactive"]).catch("all").default("all"),
   ),
+  page: z.preprocess(
+    firstSearchParam,
+    z.coerce.number().int().min(1).catch(1).default(1),
+  ),
+  pageSize: z.preprocess(
+    firstSearchParam,
+    z.coerce.number().pipe(z.union([z.literal(10), z.literal(20), z.literal(50)])).catch(20).default(20),
+  ),
 });

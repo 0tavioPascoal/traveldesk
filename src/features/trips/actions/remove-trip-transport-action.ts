@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { tripTransportMessage } from "@/features/trips/application/map-trip-transport-error";
 import { removeTripTransport } from "@/features/trips/application/remove-trip-transport";
 import { removeTripTransportSchema } from "@/features/trips/schemas/trip-transport-schema";
@@ -22,5 +23,6 @@ export async function removeTripTransportAction(
   const base = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(base);
   revalidatePath(`${base}/${tripId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: "Reserva de transporte removida." };
 }

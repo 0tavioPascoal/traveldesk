@@ -1,4 +1,5 @@
-import { PageContainer } from "@/components/page/page-container";
-import { UnavailabilitiesListSkeleton } from "@/features/unavailabilities/components/unavailabilities-list-skeleton";
+import { ListPageSkeleton } from "@/components/list-page/list-page-skeleton";
 
-export default function LoadingUnavailabilities() { return <PageContainer><UnavailabilitiesListSkeleton /></PageContainer>; }
+export default function LoadingUnavailabilities() {
+  return <ListPageSkeleton hasTabs />;
+}

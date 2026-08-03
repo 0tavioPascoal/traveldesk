@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { createTechnician } from "@/features/technicians/application/create-technician";
 import { readTechnicianFormValues } from "@/features/technicians/actions/read-technician-form-values";
 import { technicianFormSchema } from "@/features/technicians/schemas/technician-schema";
@@ -35,5 +36,6 @@ export async function createTechnicianAction(
   if (!result.success) return { status: "error", fieldErrors: {}, message: errorMessages[result.reason], values };
   const listPath = `/app/${organizationSlug}/cadastros/tecnicos`;
   revalidatePath(listPath);
+  revalidateSchedule(organizationSlug);
   redirect(`${listPath}/${result.technicianId}?feedback=created`);
 }

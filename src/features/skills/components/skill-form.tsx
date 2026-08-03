@@ -1,9 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { CatalogFormFields } from "@/components/catalog/catalog-form-fields";
+import { FormCancelLink } from "@/components/forms/form-cancel-link";
+import { FormActions, FormSurface } from "@/components/forms/form-layout";
+import { useFocusFirstInvalid } from "@/components/forms/use-focus-first-invalid";
 import { buttonStyles } from "@/components/ui/button";
 import { InlineAlert } from "@/components/ui/inline-alert";
 import { createSkillAction } from "@/features/skills/actions/create-skill-action";
@@ -34,21 +36,18 @@ export function SkillForm({
     values: initialValues,
   };
   const [state, formAction, pending] = useActionState(action, initialState);
+  const formRef = useFocusFirstInvalid(state.fieldErrors);
+  const [dirty, setDirty] = useState(false);
   const listPath = `/app/${organizationSlug}/cadastros/especialidades`;
 
   return (
-    <form action={formAction} noValidate className="space-y-6">
-      <CatalogFormFields idPrefix="skill" values={state.values} errors={state.fieldErrors} pending={pending} namePlaceholder="Ex.: Integração de sistemas" descriptionHelp="Descreva de forma breve o conhecimento ou competência representada. Máximo de 1.000 caracteres." activeHelp="Especialidades ativas ficam disponíveis para novos vínculos e planejamentos." />
+    <form ref={formRef} action={formAction} noValidate onChange={() => setDirty(true)} className="space-y-6">
+      <FormSurface><div className="space-y-5"><CatalogFormFields idPrefix="skill" values={state.values} errors={state.fieldErrors} pending={pending} namePlaceholder="Ex.: Integração de sistemas" descriptionHelp="Descreva de forma breve o conhecimento ou competência representada. Máximo de 1.000 caracteres." activeHelp="Especialidades ativas ficam disponíveis para novos vínculos e planejamentos." /></div></FormSurface>
 
       {state.message ? <InlineAlert tone="error">{state.message}</InlineAlert> : null}
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <Link
-          href={listPath}
-          className={buttonStyles({ variant: "secondary" })}
-        >
-          Cancelar
-        </Link>
+      <FormActions>
+        <FormCancelLink href={listPath} dirty={dirty} />
         <button
           type="submit"
           disabled={pending}
@@ -56,7 +55,7 @@ export function SkillForm({
         >
           {pending ? "Salvando..." : skillId ? "Salvar alterações" : "Criar especialidade"}
         </button>
-      </div>
+      </FormActions>
     </form>
   );
 }

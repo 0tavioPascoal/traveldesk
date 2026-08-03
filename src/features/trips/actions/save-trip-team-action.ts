@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { tripStaffingMessage } from "@/features/trips/application/map-trip-staffing-error";
 import { replaceTripTechnicians } from "@/features/trips/application/replace-trip-technicians";
 import { tripTechniciansSchema } from "@/features/trips/schemas/trip-technicians-schema";
@@ -29,5 +30,6 @@ export async function saveTripTeamAction(
   const base = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(base);
   revalidatePath(`${base}/${tripId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: "Equipe técnica atualizada." };
 }

@@ -24,7 +24,7 @@ export async function listTechnicians(
   const context = await requireOrganizationRole(organizationSlug, roles);
   const supabase = await createClient();
   let allowedIds: string[] | null = null;
-  const pageSize = 20;
+  const pageSize = filters.pageSize;
 
   if (filters.skillId) {
     const { data, error } = await supabase

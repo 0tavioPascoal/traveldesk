@@ -1858,6 +1858,29 @@ export type Database = {
           to_status: Database["public"]["Enums"]["trip_status"]
         }[]
       }
+      list_my_operational_trips: {
+        Args: {
+          p_limit?: number
+          p_organization_id: string
+          p_trip_id?: string | null
+        }
+        Returns: {
+          client_name: string
+          client_unit_name: string
+          code: string
+          destination_city: string | null
+          destination_state: string | null
+          id: string
+          is_responsible: boolean
+          priority: Database["public"]["Enums"]["trip_priority"]
+          service_ends_at: string | null
+          service_starts_at: string | null
+          status: Database["public"]["Enums"]["trip_status"]
+          title: string
+          travel_ends_at: string | null
+          travel_starts_at: string | null
+        }[]
+      }
       mark_trip_as_planned: {
         Args: { p_organization_id: string; p_trip_id: string }
         Returns: boolean

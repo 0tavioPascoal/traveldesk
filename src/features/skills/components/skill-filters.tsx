@@ -12,5 +12,5 @@ export function SkillFilters({
 }: SkillFiltersProps) {
   const listPath = `/app/${organizationSlug}/cadastros/especialidades`;
 
-  return <CatalogFilters path={listPath} query={filters.query} status={filters.status} placeholder="Buscar especialidade..." />;
+  return <CatalogFilters path={listPath} query={filters.query} status={filters.status} placeholder="Pesquisar especialidade..." />;
 }

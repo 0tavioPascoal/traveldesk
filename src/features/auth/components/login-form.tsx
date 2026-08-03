@@ -1,8 +1,10 @@
 "use client";
 
+import { ArrowRight, LoaderCircle, LockKeyhole, Mail } from "lucide-react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
+import { InlineAlert } from "@/components/ui/inline-alert";
 import { loginAction } from "@/features/auth/actions/login-action";
 import type { LoginActionState } from "@/features/auth/types/auth";
 
@@ -10,6 +12,7 @@ const initialState: LoginActionState = {
   status: "idle",
   fieldErrors: {},
   message: null,
+  email: "",
 };
 
 function SubmitButton() {
@@ -19,9 +22,19 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="flex h-11 w-full items-center justify-center rounded-lg bg-zinc-950 px-4 text-sm font-semibold text-white transition hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950 disabled:cursor-not-allowed disabled:opacity-60"
+      className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending ? "Entrando..." : "Entrar"}
+      {pending ? (
+        <>
+          <LoaderCircle aria-hidden="true" className="size-4 animate-spin" />
+          Entrando...
+        </>
+      ) : (
+        <>
+          Entrar
+          <ArrowRight aria-hidden="true" className="size-4" />
+        </>
+      )}
     </button>
   );
 }
@@ -36,26 +49,38 @@ export function LoginForm() {
   const passwordError = state.fieldErrors.password?.[0];
 
   return (
-    <form action={formAction} noValidate className="space-y-5">
+    <form
+      action={formAction}
+      noValidate
+      aria-label="Acesso ao TravelDesk"
+      className="space-y-5"
+    >
       <div className="space-y-2">
-        <label htmlFor="email" className="block text-sm font-medium text-zinc-800">
+        <label htmlFor="email" className="block text-sm font-medium text-card-foreground">
           E-mail
         </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          autoComplete="email"
-          autoFocus
-          required
-          disabled={pending}
-          aria-invalid={emailError ? true : undefined}
-          aria-describedby={emailError ? "email-error" : undefined}
-          className="h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10 disabled:cursor-not-allowed disabled:bg-zinc-100 sm:text-sm"
-          placeholder="voce@empresa.com"
-        />
+        <div className="relative">
+          <Mail
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            autoFocus
+            required
+            defaultValue={state.email}
+            disabled={pending}
+            aria-invalid={emailError ? true : undefined}
+            aria-describedby={emailError ? "email-error" : undefined}
+            className="h-11 w-full rounded-lg border border-input bg-background px-10 text-base text-foreground outline-none transition placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted sm:text-sm"
+            placeholder="voce@empresa.com"
+          />
+        </div>
         {emailError ? (
-          <p id="email-error" role="alert" className="text-sm text-red-700">
+          <p id="email-error" role="alert" className="text-sm text-destructive">
             {emailError}
           </p>
         ) : null}
@@ -64,35 +89,36 @@ export function LoginForm() {
       <div className="space-y-2">
         <label
           htmlFor="password"
-          className="block text-sm font-medium text-zinc-800"
+          className="block text-sm font-medium text-card-foreground"
         >
           Senha
         </label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          disabled={pending}
-          aria-invalid={passwordError ? true : undefined}
-          aria-describedby={passwordError ? "password-error" : undefined}
-          className="h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-950 outline-none transition focus:border-zinc-950 focus:ring-2 focus:ring-zinc-950/10 disabled:cursor-not-allowed disabled:bg-zinc-100 sm:text-sm"
-        />
+        <div className="relative">
+          <LockKeyhole
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            disabled={pending}
+            aria-invalid={passwordError ? true : undefined}
+            aria-describedby={passwordError ? "password-error" : undefined}
+            className="h-11 w-full rounded-lg border border-input bg-background px-10 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted sm:text-sm"
+          />
+        </div>
         {passwordError ? (
-          <p id="password-error" role="alert" className="text-sm text-red-700">
+          <p id="password-error" role="alert" className="text-sm text-destructive">
             {passwordError}
           </p>
         ) : null}
       </div>
 
       {state.message ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800"
-        >
-          {state.message}
-        </p>
+        <InlineAlert tone="error">{state.message}</InlineAlert>
       ) : null}
 
       <SubmitButton />

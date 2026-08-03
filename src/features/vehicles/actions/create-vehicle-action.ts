@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { readVehicleFormValues } from "@/features/vehicles/actions/read-vehicle-form-values";
 import { createVehicle } from "@/features/vehicles/application/create-vehicle";
 import { vehicleFormSchema } from "@/features/vehicles/schemas/vehicle-schema";
@@ -37,5 +38,6 @@ export async function createVehicleAction(
   }
   const listPath = `/app/${organizationSlug}/cadastros/veiculos`;
   revalidatePath(listPath);
+  revalidateSchedule(organizationSlug);
   redirect(`${listPath}/${result.vehicleId}?feedback=created`);
 }

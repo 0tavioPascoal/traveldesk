@@ -1,5 +1,18 @@
-import Link from "next/link";
+"use client";
 
+import { SlidersHorizontal, X } from "lucide-react";
+import Link from "next/link";
+import { useRef } from "react";
+
+import { ListActiveFilters } from "@/components/list-page/list-active-filters";
+import {
+  ListSearchField,
+  listControlStyles,
+} from "@/components/list-page/list-controls";
+import {
+  listToolbarSearchFormStyles,
+  listToolbarUtilitiesStyles,
+} from "@/components/list-page/list-toolbar";
 import { buttonStyles } from "@/components/ui/button";
 
 type CatalogFiltersProps = {
@@ -9,76 +22,122 @@ type CatalogFiltersProps = {
   placeholder: string;
 };
 
-const controlStyles =
-  "h-10 w-full rounded-lg border border-input bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60";
-
 export function CatalogFilters({
   path,
   query,
   status,
   placeholder,
 }: CatalogFiltersProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const hasFilters = query !== "" || status !== "all";
   const statusLabel = status === "active" ? "Ativos" : "Inativos";
+  const activeItems = [
+    ...(query
+      ? [
+          {
+            key: "query",
+            label: `Pesquisa: ${query}`,
+            href: status === "all" ? path : `${path}?status=${status}`,
+          },
+        ]
+      : []),
+    ...(status !== "all"
+      ? [
+          {
+            key: "status",
+            label: `Situação: ${statusLabel}`,
+            href: query ? `${path}?query=${encodeURIComponent(query)}` : path,
+          },
+        ]
+      : []),
+  ];
 
   return (
-    <div className="space-y-4">
-      <form action={path} className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-end">
-        <div className="space-y-2">
-          <label htmlFor="query" className="block text-sm font-medium text-foreground">
-            Pesquisar
-          </label>
-          <input
-            id="query"
-            name="query"
-            type="search"
-            maxLength={160}
-            defaultValue={query}
+    <>
+      <div className={listToolbarUtilitiesStyles}>
+        <form action={path} className={listToolbarSearchFormStyles}>
+          <input type="hidden" name="status" value={status} />
+          <ListSearchField
+            id="mobile-catalog-query"
+            label="Pesquisar"
             placeholder={placeholder}
-            className={controlStyles}
+            defaultValue={query}
+            compact
           />
-        </div>
-        <div className="space-y-2">
-          <label htmlFor="status" className="block text-sm font-medium text-foreground">
-            Situação
-          </label>
-          <select id="status" name="status" defaultValue={status} className={controlStyles}>
-            <option value="all">Todos</option>
-            <option value="active">Ativos</option>
-            <option value="inactive">Inativos</option>
-          </select>
-        </div>
-        <div className="flex gap-2">
-          <button type="submit" className={`${buttonStyles({ size: "sm" })} flex-1 sm:flex-none`}>
-            Filtrar
-          </button>
-          {hasFilters ? (
-            <Link href={path} className={`${buttonStyles({ variant: "secondary", size: "sm" })} flex-1 sm:flex-none`}>
-              Limpar
-            </Link>
-          ) : null}
-        </div>
-      </form>
+        </form>
+        <button
+          type="button"
+          onClick={() => dialogRef.current?.showModal()}
+          className={`${buttonStyles({ variant: "secondary", size: "sm" })} shrink-0`}
+        >
+          <SlidersHorizontal aria-hidden="true" className="size-4" />
+          Filtros{status !== "all" ? " (1)" : ""}
+        </button>
+      </div>
 
-      {hasFilters ? (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4" aria-label="Filtros ativos">
-          <div className="flex flex-wrap gap-2 text-xs">
-            {query ? (
-              <span className="rounded-full border border-border bg-muted px-3 py-1.5 text-muted-foreground">
-                Pesquisa: <span className="font-semibold text-foreground">{query}</span>
-              </span>
-            ) : null}
-            {status !== "all" ? (
-              <span className="rounded-full border border-border bg-muted px-3 py-1.5 text-muted-foreground">
-                Situação: <span className="font-semibold text-foreground">{statusLabel}</span>
-              </span>
-            ) : null}
+      <ListActiveFilters items={activeItems} clearHref={path} />
+
+      <dialog
+        ref={dialogRef}
+        aria-labelledby="catalog-filters-title"
+        className="m-auto w-[min(28rem,calc(100%-2rem))] rounded-xl border border-border bg-popover p-0 text-popover-foreground shadow-2xl"
+        onClick={(event) => {
+          if (event.target === dialogRef.current) dialogRef.current?.close();
+        }}
+      >
+        <form action={path} className="space-y-5 p-5">
+          <input type="hidden" name="query" value={query} />
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 id="catalog-filters-title" className="text-lg font-semibold">
+                Filtros
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Refine os registros pela situação cadastral.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => dialogRef.current?.close()}
+              aria-label="Fechar filtros"
+              className="grid size-10 place-items-center rounded-lg text-muted-foreground hover:bg-muted"
+            >
+              <X aria-hidden="true" className="size-5" />
+            </button>
           </div>
-          <Link href={path} className="text-sm font-semibold text-primary hover:underline">
-            Limpar filtros
-          </Link>
-        </div>
-      ) : null}
-    </div>
+          <div className="space-y-1.5">
+            <label
+              htmlFor="mobile-catalog-status"
+              className="text-sm font-medium"
+            >
+              Situação
+            </label>
+            <select
+              id="mobile-catalog-status"
+              name="status"
+              defaultValue={status}
+              className={listControlStyles}
+            >
+              <option value="all">Todos</option>
+              <option value="active">Ativos</option>
+              <option value="inactive">Inativos</option>
+            </select>
+          </div>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            {hasFilters ? (
+              <Link
+                href={path}
+                className={buttonStyles({ variant: "secondary" })}
+              >
+                Limpar filtros
+              </Link>
+            ) : null}
+            <button type="submit" className={buttonStyles()}>
+              Aplicar filtros
+            </button>
+          </div>
+        </form>
+      </dialog>
+    </>
   );
 }

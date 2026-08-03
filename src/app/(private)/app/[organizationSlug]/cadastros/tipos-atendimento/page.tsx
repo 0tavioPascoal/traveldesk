@@ -1,6 +1,14 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { PageContainer } from "@/components/page/page-container";
+import {
+  ListPageContent,
+  ListPageFooter,
+  ListPageShell,
+} from "@/components/list-page/list-page-shell";
+import { ListPagination } from "@/components/list-page/list-pagination";
+import { ListToolbar } from "@/components/list-page/list-toolbar";
+import { RefreshListButton } from "@/components/list-page/refresh-list-button";
 import { PageHeader } from "@/components/page/page-header";
 import { buttonStyles } from "@/components/ui/button";
 import { InlineAlert } from "@/components/ui/inline-alert";
@@ -55,28 +63,31 @@ export default async function ServiceTypesPage({
   const hasFilters = filters.query !== "" || filters.status !== "all";
 
   return (
-    <PageContainer className="max-w-6xl space-y-6">
-        <PageHeader title="Tipos de atendimento" description="Gerencie as categorias utilizadas para classificar os atendimentos técnicos." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Cadastros" }, { label: "Tipos de atendimento" }]} actions={<Link href={`/app/${organizationSlug}/cadastros/tipos-atendimento/novo`} className={`${buttonStyles()} w-full sm:w-auto`}>Novo tipo de atendimento</Link>} />
+    <ListPageShell>
+        <PageHeader title="Tipos de atendimento" description="Gerencie as categorias utilizadas para classificar os atendimentos técnicos." breadcrumbs={[{ label: "Cadastros" }, { label: "Tipos de atendimento" }]} />
 
         {feedback ? (
           <InlineAlert tone="success">{feedback}</InlineAlert>
         ) : null}
 
-        <section aria-label="Pesquisa e filtros" className="rounded-2xl border border-border bg-card p-5">
+        <ListToolbar actions={<><Link href={`/app/${organizationSlug}/cadastros/tipos-atendimento/novo`} className={buttonStyles({ size: "sm" })}><Plus aria-hidden="true" className="size-4" />Novo tipo de atendimento</Link><RefreshListButton /></>}>
           <ServiceTypeFilters
             organizationSlug={organizationSlug}
             filters={filters}
           />
-        </section>
+        </ListToolbar>
 
-        <section>
+        <ListPageContent>
           <ServiceTypeList
-            organizationSlug={organizationSlug}
-            serviceTypes={serviceTypes}
-            timezone={context.organization.timezone}
-            hasFilters={hasFilters}
+              organizationSlug={organizationSlug}
+              serviceTypes={serviceTypes}
+              timezone={context.organization.timezone}
+              hasFilters={hasFilters}
           />
-        </section>
-    </PageContainer>
+        </ListPageContent>
+        <ListPageFooter>
+          <ListPagination ariaLabel="Resumo de tipos de atendimento" page={1} totalPages={1} total={serviceTypes.length} pageSize={Math.max(serviceTypes.length, 1)} itemName={{ singular: "tipo de atendimento", plural: "tipos de atendimento" }} href={() => `/app/${organizationSlug}/cadastros/tipos-atendimento`} />
+        </ListPageFooter>
+    </ListPageShell>
   );
 }

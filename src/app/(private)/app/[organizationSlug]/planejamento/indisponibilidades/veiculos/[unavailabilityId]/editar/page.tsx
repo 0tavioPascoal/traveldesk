@@ -1,4 +1,4 @@
-import { PageContainer } from "@/components/page/page-container";
+import { FormPageContainer } from "@/components/page/page-container";
 import { PageHeader } from "@/components/page/page-header";
 import { notFound } from "next/navigation";
 
@@ -28,5 +28,5 @@ export default async function EditVehicleUnavailabilityPage({ params }: { params
   if (!types.some((type) => type.id === item.typeId)) types.push({ id: item.typeId, name: item.typeName, active: false });
   const period = formatUnavailabilityPeriodForForm(item.startsAt, item.endsAt, item.allDay, context.organization.timezone);
   const path = `/app/${organizationSlug}/planejamento/indisponibilidades?resource=vehicles`;
-  return <PageContainer className="max-w-5xl space-y-6"><PageHeader title="Editar indisponibilidade de veículo" description="A indisponibilidade mantém a semântica [início, fim) e não altera automaticamente a condição operacional." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Indisponibilidades", href: path }, { label: "Editar indisponibilidade" }]} /><section className="rounded-2xl border border-border bg-card p-5 sm:p-6"><UnavailabilityForm organizationSlug={organizationSlug} resource="vehicles" timezone={context.organization.timezone} resources={resources} types={types} unavailabilityId={unavailabilityId} initialValues={{ resourceId: item.resourceId, unavailabilityTypeId: item.typeId, startsAt: period.startsAt, endsAt: period.endsAt, allDay: item.allDay, reason: item.reason ?? "", notes: item.notes ?? "" }} /></section></PageContainer>;
+  return <FormPageContainer><PageHeader title="Editar indisponibilidade de veículo" description="A indisponibilidade mantém a semântica [início, fim) e não altera automaticamente a condição operacional." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Indisponibilidades", href: path }, { label: "Editar indisponibilidade" }]} /><UnavailabilityForm organizationSlug={organizationSlug} resource="vehicles" timezone={context.organization.timezone} resources={resources} types={types} unavailabilityId={unavailabilityId} initialValues={{ resourceId: item.resourceId, unavailabilityTypeId: item.typeId, startsAt: period.startsAt, endsAt: period.endsAt, allDay: item.allDay, reason: item.reason ?? "", notes: item.notes ?? "" }} /></FormPageContainer>;
 }

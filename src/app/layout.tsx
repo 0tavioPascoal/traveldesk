@@ -17,6 +17,15 @@ export const metadata: Metadata = {
   description: "Gestão de viagens e escalas de técnicos.",
 };
 
+const themeInitializationScript = `
+try {
+  const storedTheme = localStorage.getItem("traveldesk-theme");
+  if (storedTheme === "light" || storedTheme === "dark") {
+    document.documentElement.dataset.theme = storedTheme;
+  }
+} catch {}
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,8 +34,12 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitializationScript }} />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

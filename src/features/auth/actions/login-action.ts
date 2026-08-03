@@ -11,8 +11,10 @@ export async function loginAction(
   _previousState: LoginActionState,
   formData: FormData,
 ): Promise<LoginActionState> {
+  const email = formData.get("email");
+  const emailValue = typeof email === "string" ? email : "";
   const validationResult = loginSchema.safeParse({
-    email: formData.get("email"),
+    email,
     password: formData.get("password"),
   });
 
@@ -26,6 +28,7 @@ export async function loginAction(
         password: fieldErrors.password,
       },
       message: null,
+      email: emailValue,
     };
   }
 
@@ -39,6 +42,7 @@ export async function loginAction(
         result.reason === "invalid_credentials"
           ? "E-mail ou senha inválidos."
           : "Não foi possível entrar agora. Tente novamente.",
+      email: validationResult.data.email,
     };
   }
 

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { readTechnicianFormValues } from "@/features/technicians/actions/read-technician-form-values";
 import { updateTechnician } from "@/features/technicians/application/update-technician";
 import { technicianFormSchema } from "@/features/technicians/schemas/technician-schema";
@@ -33,5 +34,6 @@ export async function updateTechnicianAction(
   const detailPath = `/app/${organizationSlug}/cadastros/tecnicos/${technicianId}`;
   revalidatePath(`/app/${organizationSlug}/cadastros/tecnicos`);
   revalidatePath(detailPath);
+  revalidateSchedule(organizationSlug);
   redirect(`${detailPath}?feedback=updated`);
 }

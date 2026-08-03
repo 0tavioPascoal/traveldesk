@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { confirmTrip } from "@/features/trips/application/confirm-trip";
 import { tripConfirmationMessage } from "@/features/trips/application/map-trip-confirmation-error";
 import { tripConfirmationSchema } from "@/features/trips/schemas/trip-confirmation-schema";
@@ -22,5 +23,6 @@ export async function confirmTripAction(
   const base = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(base);
   revalidatePath(`${base}/${tripId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: "Viagem confirmada com sucesso." };
 }

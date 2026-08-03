@@ -1,4 +1,4 @@
-import { PageContainer } from "@/components/page/page-container";
+import { FormPageContainer } from "@/components/page/page-container";
 import { PageHeader } from "@/components/page/page-header";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { UnavailabilityForm } from "@/features/unavailabilities/components/unavailability-form";
@@ -11,5 +11,5 @@ export default async function NewTechnicianUnavailabilityPage({ params, searchPa
   const [resources, types, query] = await Promise.all([listTechnicianUnavailabilityResources(organizationSlug, true), listActiveTechnicianUnavailabilityTypes(organizationSlug), searchParams]);
   const requestedId = Array.isArray(query.technicianId) ? query.technicianId[0] : query.technicianId;
   const initialId = resources.some((resource) => resource.id === requestedId) ? requestedId ?? "" : "";
-  return <PageContainer className="max-w-5xl space-y-6"><PageHeader title="Nova indisponibilidade de técnico" description={`Os horários usam o fuso ${context.organization.timezone} e o período final é exclusivo.`} breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Indisponibilidades", href: `/app/${organizationSlug}/planejamento/indisponibilidades?resource=technicians` }, { label: "Nova indisponibilidade" }]} /><section className="rounded-2xl border border-border bg-card p-5 sm:p-6"><UnavailabilityForm organizationSlug={organizationSlug} resource="technicians" timezone={context.organization.timezone} resources={resources} types={types} initialValues={{ resourceId: initialId, unavailabilityTypeId: "", startsAt: "", endsAt: "", allDay: false, reason: "", notes: "" }} /></section></PageContainer>;
+  return <FormPageContainer><PageHeader title="Nova indisponibilidade de técnico" description={`Os horários usam o fuso ${context.organization.timezone} e o período final é exclusivo.`} breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Indisponibilidades", href: `/app/${organizationSlug}/planejamento/indisponibilidades?resource=technicians` }, { label: "Nova indisponibilidade" }]} /><UnavailabilityForm organizationSlug={organizationSlug} resource="technicians" timezone={context.organization.timezone} resources={resources} types={types} initialValues={{ resourceId: initialId, unavailabilityTypeId: "", startsAt: "", endsAt: "", allDay: false, reason: "", notes: "" }} /></FormPageContainer>;
 }

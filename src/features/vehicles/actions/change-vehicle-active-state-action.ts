@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { changeVehicleActiveState } from "@/features/vehicles/application/change-vehicle-active-state";
 import { vehicleActiveStateSchema } from "@/features/vehicles/schemas/vehicle-schema";
 import type { VehicleQuickActionState } from "@/features/vehicles/types/vehicle";
@@ -22,5 +23,6 @@ export async function changeVehicleActiveStateAction(
   const listPath = `/app/${organizationSlug}/cadastros/veiculos`;
   revalidatePath(listPath);
   revalidatePath(`${listPath}/${vehicleId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: active ? "Veículo ativado com sucesso." : "Veículo inativado com sucesso." };
 }

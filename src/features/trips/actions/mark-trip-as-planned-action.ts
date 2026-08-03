@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { tripActionMessage } from "@/features/trips/actions/trip-action-message";
 import { markTripAsPlanned } from "@/features/trips/application/mark-trip-as-planned";
 import { tripTransitionSchema } from "@/features/trips/schemas/trip-transition-schema";
@@ -15,5 +16,6 @@ export async function markTripAsPlannedAction(organizationSlug: string, tripId: 
   if (!result.success) return { status: "error", message: tripActionMessage(result.reason) };
   const base = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(base); revalidatePath(`${base}/${tripId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: "Viagem marcada como planejada." };
 }

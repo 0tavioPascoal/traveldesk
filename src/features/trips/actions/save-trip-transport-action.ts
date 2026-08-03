@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { revalidateSchedule } from "@/features/schedule/application/revalidate-schedule";
 import { tripTransportMessage } from "@/features/trips/application/map-trip-transport-error";
 import { saveTripTransport } from "@/features/trips/application/save-trip-transport";
 import { tripTransportSchema } from "@/features/trips/schemas/trip-transport-schema";
@@ -33,5 +34,6 @@ export async function saveTripTransportAction(
   const base = `/app/${organizationSlug}/planejamento/viagens`;
   revalidatePath(base);
   revalidatePath(`${base}/${tripId}`);
+  revalidateSchedule(organizationSlug);
   return { status: "success", message: "Transporte atualizado com sucesso." };
 }

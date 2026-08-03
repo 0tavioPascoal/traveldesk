@@ -48,7 +48,11 @@ export function MobileSidebar({
         >
           <X aria-hidden="true" className="size-5" />
         </button>
-        <AppSidebar currentOrganization={currentOrganization} role={role} onNavigate={() => dialogRef.current?.close()} />
+        <AppSidebar
+          currentOrganization={currentOrganization}
+          role={role}
+          onNavigate={() => dialogRef.current?.close()}
+        />
       </dialog>
     </>
   );

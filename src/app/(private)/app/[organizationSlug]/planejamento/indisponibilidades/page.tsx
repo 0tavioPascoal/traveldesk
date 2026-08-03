@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
 
-import { PageContainer } from "@/components/page/page-container";
+import {
+  ListPageContent,
+  ListPageFooter,
+  ListPageShell,
+} from "@/components/list-page/list-page-shell";
+import { ListToolbar } from "@/components/list-page/list-toolbar";
+import { RefreshListButton } from "@/components/list-page/refresh-list-button";
 import { PageHeader } from "@/components/page/page-header";
 import { InlineAlert } from "@/components/ui/inline-alert";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
@@ -19,7 +25,6 @@ import { unavailabilityFilterSchema } from "@/features/unavailabilities/schemas/
 import type { CentralUnavailabilityListItem, UnavailabilityFilters as FilterValues } from "@/features/unavailabilities/types/unavailability";
 
 type Props = { params: Promise<{ organizationSlug: string }>; searchParams: Promise<Record<string, string | string[] | undefined>> };
-const PAGE_SIZE = 20;
 
 export default async function UnavailabilitiesPage({ params, searchParams }: Props) {
   const { organizationSlug } = await params;
@@ -65,7 +70,7 @@ export default async function UnavailabilitiesPage({ params, searchParams }: Pro
   }
   allItems.sort((left, right) => new Date(right.startsAt).getTime() - new Date(left.startsAt).getTime());
   const total = allItems.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / filters.pageSize));
   if (filters.page > totalPages && total > 0) {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(rawSearchParams)) {
@@ -74,17 +79,21 @@ export default async function UnavailabilitiesPage({ params, searchParams }: Pro
     }
     redirect(`${`/app/${organizationSlug}/planejamento/indisponibilidades`}${params.size ? `?${params}` : ""}`);
   }
-  const items = allItems.slice((filters.page - 1) * PAGE_SIZE, filters.page * PAGE_SIZE);
+  const items = allItems.slice((filters.page - 1) * filters.pageSize, filters.page * filters.pageSize);
   const hasFilters = filters.resource !== "all" || Boolean(filters.query || filters.startsOn || filters.endsOn || filters.resourceId || filters.unavailabilityTypeId || filters.temporalStatus !== "all" || filters.status !== "all");
   const feedback = Array.isArray(rawSearchParams.feedback) ? rawSearchParams.feedback[0] : rawSearchParams.feedback;
   const feedbackMessage = feedback === "created" ? "Indisponibilidade cadastrada com sucesso." : feedback === "updated" ? "Indisponibilidade atualizada com sucesso." : null;
 
-  return <PageContainer className="space-y-6">
-    <PageHeader title="Indisponibilidades" description="Gerencie os períodos em que técnicos e veículos não podem ser utilizados nas viagens." breadcrumbs={[{ label: "Visão geral", href: `/app/${organizationSlug}/dashboard` }, { label: "Planejamento" }, { label: "Indisponibilidades" }]} actions={<UnavailabilityCreateAction organizationSlug={organizationSlug} />} />
+  return <ListPageShell>
+    <PageHeader title="Indisponibilidades" description="Gerencie os períodos em que técnicos e veículos não podem ser utilizados nas viagens." breadcrumbs={[{ label: "Planejamento" }, { label: "Indisponibilidades" }]} />
     {feedbackMessage ? <InlineAlert tone="success">{feedbackMessage}</InlineAlert> : null}
     <UnavailabilityResourceTabs organizationSlug={organizationSlug} filters={filters} />
-    <section aria-label="Filtros de indisponibilidades" className="rounded-xl border border-border bg-card p-4 sm:p-5"><UnavailabilityFilters organizationSlug={organizationSlug} filters={filters} resources={resources} types={types} /></section>
-    <UnavailabilityList organizationSlug={organizationSlug} items={items} timezone={context.organization.timezone} role={context.membership.role as "admin" | "coordinator"} hasFilters={hasFilters} referenceTime={referenceTime} />
-    <UnavailabilityPagination organizationSlug={organizationSlug} filters={filters} total={total} totalPages={totalPages} pageSize={PAGE_SIZE} />
-  </PageContainer>;
+    <ListToolbar actions={<><UnavailabilityCreateAction organizationSlug={organizationSlug} /><RefreshListButton /></>}><UnavailabilityFilters organizationSlug={organizationSlug} filters={filters} resources={resources} types={types} timezone={context.organization.timezone} /></ListToolbar>
+    <ListPageContent>
+      <UnavailabilityList organizationSlug={organizationSlug} items={items} timezone={context.organization.timezone} role={context.membership.role as "admin" | "coordinator"} hasFilters={hasFilters} referenceTime={referenceTime} />
+    </ListPageContent>
+    <ListPageFooter>
+      <UnavailabilityPagination organizationSlug={organizationSlug} filters={filters} total={total} totalPages={totalPages} pageSize={filters.pageSize} />
+    </ListPageFooter>
+  </ListPageShell>;
 }

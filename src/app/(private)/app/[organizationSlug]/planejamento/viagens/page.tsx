@@ -1,12 +1,20 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
-import { PageContainer } from "@/components/page/page-container";
+import { ColumnVisibilityMenu } from "@/components/list-page/column-visibility-menu";
+import {
+  ListPageContent,
+  ListPageFooter,
+  ListPageShell,
+} from "@/components/list-page/list-page-shell";
+import { ListToolbar } from "@/components/list-page/list-toolbar";
+import { RefreshListButton } from "@/components/list-page/refresh-list-button";
 import { PageHeader } from "@/components/page/page-header";
 import { buttonStyles } from "@/components/ui/button";
 import { requireOrganizationRole } from "@/features/organizations/application/require-organization-role";
 import { TripFilters } from "@/features/trips/components/trip-filters";
 import { TripList } from "@/features/trips/components/trip-list";
+import { TripPagination } from "@/features/trips/components/trip-pagination";
 import { listTrips } from "@/features/trips/queries/list-trips";
 import { tripFilterSchema } from "@/features/trips/schemas/trip-filter-schema";
 
@@ -22,7 +30,7 @@ export default async function TripsPage({ params, searchParams }: Props) {
     ["admin", "coordinator"] as const,
   );
   const filters = tripFilterSchema.parse(await searchParams);
-  const trips = await listTrips(organizationSlug, filters);
+  const result = await listTrips(organizationSlug, filters);
   const hasFilters = Boolean(
     filters.query ||
     filters.status !== "all" ||
@@ -32,29 +40,36 @@ export default async function TripsPage({ params, searchParams }: Props) {
   );
 
   return (
-    <PageContainer className="space-y-6">
+    <ListPageShell>
         <PageHeader
           title="Viagens"
           description="Planeje, acompanhe e execute as viagens técnicas da organização."
           breadcrumbs={[
-            { label: "Visão geral", href: `/app/${organizationSlug}/dashboard` },
             { label: "Planejamento" },
             { label: "Viagens" },
           ]}
-          actions={<Link href={`/app/${organizationSlug}/planejamento/viagens/nova`} className={buttonStyles()}><Plus aria-hidden="true" className="size-4" />Nova viagem</Link>}
         />
-        <section aria-label="Pesquisa e filtros de viagens" className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
-          <TripFilters organizationSlug={organizationSlug} filters={filters} />
-        </section>
-        <div role="status" className="flex items-center justify-between text-sm text-muted-foreground">
-          <p>{trips.length} {trips.length === 1 ? "viagem encontrada" : "viagens encontradas"}</p>
-        </div>
-        <TripList
-          organizationSlug={organizationSlug}
-          items={trips}
-          timezone={context.organization.timezone}
-          hasFilters={hasFilters}
-        />
-    </PageContainer>
+        <ListToolbar
+          actions={<><Link href={`/app/${organizationSlug}/planejamento/viagens/nova`} className={buttonStyles({ size: "sm" })}><Plus aria-hidden="true" className="size-4" />Nova viagem</Link><RefreshListButton /></>}
+          columnControl={<ColumnVisibilityMenu listKey="trips" columns={[{ key: "client", label: "Cliente e unidade" }, { key: "period", label: "Período" }, { key: "nextStep", label: "Próxima etapa" }, { key: "priority", label: "Prioridade" }]} />}
+        >
+          <TripFilters
+            organizationSlug={organizationSlug}
+            filters={filters}
+            timezone={context.organization.timezone}
+          />
+        </ListToolbar>
+        <ListPageContent>
+          <TripList
+            organizationSlug={organizationSlug}
+            items={result.items}
+            timezone={context.organization.timezone}
+            hasFilters={hasFilters}
+          />
+        </ListPageContent>
+        <ListPageFooter>
+          <TripPagination organizationSlug={organizationSlug} filters={filters} total={result.total} totalPages={result.totalPages} pageSize={result.pageSize} />
+        </ListPageFooter>
+    </ListPageShell>
   );
 }

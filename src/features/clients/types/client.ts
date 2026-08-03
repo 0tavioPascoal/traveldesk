@@ -46,6 +46,13 @@ export type ClientUnit = Pick<
   | "updated_at"
 >;
 
+export type ClientUnitListItem = ClientUnit & {
+  client: Pick<
+    Tables<"clients">,
+    "id" | "legal_name" | "trade_name" | "active"
+  >;
+};
+
 export type ActiveClient = Pick<
   Tables<"clients">,
   "id" | "legal_name" | "trade_name"
@@ -61,11 +68,34 @@ export type ClientStatusFilter = "all" | "active" | "inactive";
 export type ClientFilters = {
   query: string;
   status: ClientStatusFilter;
+  page: number;
+  pageSize: number;
+};
+
+export type ClientListResult = {
+  items: ClientListItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 };
 
 export type ClientUnitFilters = {
   query: string;
   status: ClientStatusFilter;
+};
+
+export type ClientUnitListFilters = ClientUnitFilters & {
+  page: number;
+  pageSize: number;
+};
+
+export type ClientUnitListResult = {
+  items: ClientUnitListItem[];
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
 };
 
 export type ClientFormValues = {

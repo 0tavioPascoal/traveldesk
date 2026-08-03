@@ -1,8 +1,20 @@
 import { Building2, Eye, Pencil } from "lucide-react";
 import Link from "next/link";
 
+import {
+  DataTableShell,
+  dataTableHeaderStyles,
+  dataTableStyles,
+} from "@/components/list-page/data-table-shell";
+import {
+  MobileRecordCard,
+  MobileRecordList,
+} from "@/components/list-page/mobile-record-list";
+import {
+  ListRowActions,
+  listActionItemStyles,
+} from "@/components/list-page/list-row-actions";
 import { ActiveStatusBadge } from "@/components/ui/active-status-badge";
-import { buttonStyles } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NoResultsState } from "@/components/ui/no-results-state";
 import { ClientStatusAction } from "@/features/clients/components/client-status-action";
@@ -48,16 +60,16 @@ export function ClientList({ organizationSlug, clients, timezone, hasFilters }: 
 
   return (
     <>
-      <div className="hidden overflow-hidden rounded-2xl border border-border bg-card md:block">
-        <table className="w-full text-left text-sm">
+      <DataTableShell>
+        <table className={dataTableStyles}>
           <caption className="sr-only">Clientes cadastrados na organização</caption>
-          <thead className="border-b border-border bg-muted/70 text-xs uppercase tracking-wide text-muted-foreground">
+          <thead className={dataTableHeaderStyles}>
             <tr>
               <th scope="col" className="px-5 py-3 font-semibold">Cliente</th>
-              <th scope="col" className="px-5 py-3 font-semibold">Documento</th>
-              <th scope="col" className="px-5 py-3 font-semibold">Unidades</th>
+              <th data-list-column="clients:document" scope="col" className="px-5 py-3 font-semibold">Documento</th>
+              <th data-list-column="clients:units" scope="col" className="px-5 py-3 font-semibold">Unidades</th>
               <th scope="col" className="px-5 py-3 font-semibold">Situação</th>
-              <th scope="col" className="hidden px-5 py-3 font-semibold xl:table-cell">Atualização</th>
+              <th data-list-column="clients:updatedAt" scope="col" className="px-5 py-3 font-semibold">Atualização</th>
               <th scope="col" className="px-5 py-3 text-right font-semibold">Ações</th>
             </tr>
           </thead>
@@ -70,31 +82,31 @@ export function ClientList({ organizationSlug, clients, timezone, hasFilters }: 
                     <Link href={detailPath} className="font-semibold text-foreground hover:text-primary hover:underline">{client.legal_name}</Link>
                     <p className="mt-1 truncate text-sm text-muted-foreground">{client.trade_name ?? "Sem nome fantasia"}</p>
                   </td>
-                  <td className="whitespace-nowrap px-5 py-4 font-mono text-xs text-muted-foreground">{formatTaxId(client.tax_id)}</td>
-                  <td className="px-5 py-4 text-muted-foreground">
+                  <td data-list-column="clients:document" className="whitespace-nowrap px-5 py-4 font-mono text-xs text-muted-foreground">{formatTaxId(client.tax_id)}</td>
+                  <td data-list-column="clients:units" className="px-5 py-4 text-muted-foreground">
                     <span className="inline-flex items-center gap-2"><Building2 aria-hidden="true" className="size-4" />{unitLabel(client.unitCount)}</span>
                   </td>
                   <td className="px-5 py-4"><ActiveStatusBadge active={client.active} /></td>
-                  <td className="hidden whitespace-nowrap px-5 py-4 text-muted-foreground xl:table-cell">{formatDate(client.updated_at, timezone)}</td>
+                  <td data-list-column="clients:updatedAt" className="whitespace-nowrap px-5 py-4 text-muted-foreground">{formatDate(client.updated_at, timezone)}</td>
                   <td className="px-5 py-4">
-                    <div className="flex items-center justify-end gap-1">
-                      <Link href={detailPath} aria-label={`Visualizar ${client.legal_name}`} className={`${buttonStyles({ variant: "ghost", size: "sm" })} px-2`}><Eye aria-hidden="true" className="size-4" /><span className="sr-only xl:not-sr-only">Visualizar</span></Link>
-                      <Link href={`${detailPath}/editar`} aria-label={`Editar ${client.legal_name}`} className={`${buttonStyles({ variant: "ghost", size: "sm" })} px-2`}><Pencil aria-hidden="true" className="size-4" /><span className="sr-only xl:not-sr-only">Editar</span></Link>
-                      <ClientStatusAction key={`${client.id}-${client.active}`} organizationSlug={organizationSlug} clientId={client.id} active={client.active} />
-                    </div>
+                    <ListRowActions label={`Abrir ações de ${client.legal_name}`} title="Ações do cliente" description={client.legal_name}>
+                      <Link href={detailPath} className={listActionItemStyles}><Eye aria-hidden="true" className="size-4" />Visualizar</Link>
+                      <Link href={`${detailPath}/editar`} className={listActionItemStyles}><Pencil aria-hidden="true" className="size-4" />Editar</Link>
+                      <div className="[&>button]:min-h-11 [&>button]:w-full [&>button]:px-3 [&>button]:text-left [&>button]:no-underline [&>button:hover]:bg-muted"><ClientStatusAction key={`${client.id}-${client.active}`} organizationSlug={organizationSlug} clientId={client.id} active={client.active} /></div>
+                    </ListRowActions>
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
-      </div>
+      </DataTableShell>
 
-      <div className="space-y-3 md:hidden" aria-label="Clientes cadastrados">
+      <MobileRecordList label="Clientes cadastrados">
         {clients.map((client) => {
           const detailPath = `${listPath}/${client.id}`;
           return (
-            <article key={client.id} className="rounded-2xl border border-border bg-card p-4">
+            <MobileRecordCard key={client.id}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <Link href={detailPath} className="font-semibold text-card-foreground hover:text-primary hover:underline">{client.legal_name}</Link>
@@ -103,19 +115,21 @@ export function ClientList({ organizationSlug, clients, timezone, hasFilters }: 
                 <ActiveStatusBadge active={client.active} />
               </div>
               <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-                <div><dt className="text-xs font-medium text-muted-foreground">Documento</dt><dd className="mt-1 font-mono text-xs text-foreground">{formatTaxId(client.tax_id)}</dd></div>
-                <div><dt className="text-xs font-medium text-muted-foreground">Unidades</dt><dd className="mt-1 text-foreground">{unitLabel(client.unitCount)}</dd></div>
+                <div data-list-column="clients:document"><dt className="text-xs font-medium text-muted-foreground">Documento</dt><dd className="mt-1 font-mono text-xs text-foreground">{formatTaxId(client.tax_id)}</dd></div>
+                <div data-list-column="clients:units"><dt className="text-xs font-medium text-muted-foreground">Unidades</dt><dd className="mt-1 text-foreground">{unitLabel(client.unitCount)}</dd></div>
               </dl>
-              <p className="mt-3 text-xs text-muted-foreground">Atualizado em {formatDate(client.updated_at, timezone)}</p>
-              <div className="mt-4 flex flex-wrap items-center gap-1 border-t border-border pt-3">
-                <Link href={detailPath} className={buttonStyles({ variant: "ghost", size: "sm" })}><Eye aria-hidden="true" className="size-4" />Visualizar</Link>
-                <Link href={`${detailPath}/editar`} className={buttonStyles({ variant: "ghost", size: "sm" })}><Pencil aria-hidden="true" className="size-4" />Editar</Link>
-                <div className="ml-auto"><ClientStatusAction key={`${client.id}-${client.active}`} organizationSlug={organizationSlug} clientId={client.id} active={client.active} /></div>
+              <p data-list-column="clients:updatedAt" className="mt-3 text-xs text-muted-foreground">Atualizado em {formatDate(client.updated_at, timezone)}</p>
+              <div className="mt-4 flex justify-end border-t border-border pt-3">
+                <ListRowActions label={`Abrir ações de ${client.legal_name}`} title="Ações do cliente" description={client.legal_name}>
+                  <Link href={detailPath} className={listActionItemStyles}><Eye aria-hidden="true" className="size-4" />Visualizar</Link>
+                  <Link href={`${detailPath}/editar`} className={listActionItemStyles}><Pencil aria-hidden="true" className="size-4" />Editar</Link>
+                  <div className="[&>button]:min-h-11 [&>button]:w-full [&>button]:px-3 [&>button]:text-left [&>button]:no-underline [&>button:hover]:bg-muted"><ClientStatusAction key={`${client.id}-${client.active}`} organizationSlug={organizationSlug} clientId={client.id} active={client.active} /></div>
+                </ListRowActions>
               </div>
-            </article>
+            </MobileRecordCard>
           );
         })}
-      </div>
+      </MobileRecordList>
     </>
   );
 }
